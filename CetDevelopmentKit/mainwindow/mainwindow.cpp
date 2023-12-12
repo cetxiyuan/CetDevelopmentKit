@@ -2,11 +2,11 @@
 #include "ui_mainwindow.h"
 #include "version.h"
 
-#include <QSettings>
 #include <QMessageBox>
 #include <QPluginLoader>
 #include <QDir>
 #include <QDebug>
+#include <QTextCodec>
 
 #define INIT_INTERFACE(mInterface, name)    \
     mInterface(qobject_cast<typeof(mInterface)>(loadPlugin(name)))
@@ -15,18 +15,21 @@
 
 #define CETDEVELOPMENTKIT_VERSION  "Cet开发集成工具包 V" APP_VERSION " " TIP_VERSION
 
-#define CETDKIT_SETTINGS_PATH        "Configs/AppMaster.ini"
 #define CETDKIT_SETTINGS_PREFIX      "CETDKITConfig"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , INIT_INTERFACE(m_cetLogManagerInterface, "CetLogManagerPlugin.dll")
+    , m_settings(new QSettings("Configs/AppMaster.ini", QSettings::IniFormat))
     , m_cmdProcess(new QProcess(this))
     , m_ec200uConfigure(new EC200UConfigure(m_cmdProcess))
     , m_adbConfigure(new ADBConfigure(m_cmdProcess))
     
 {
+    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+    QTextCodec::setCodecForLocale(codec);
+
     ui->setupUi(this);
     setWindowTitle(tr(CETDEVELOPMENTKIT_VERSION));
 
@@ -41,10 +44,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->processComboBox->addItem("EC200U 差分包制作", CONFIG_EC200U_DPATH);
     ui->processComboBox->addItem("ADB 设备数据打包导出", CONFIG_ADB_ZIPEXPORT);
     
-    QSettings setting(CETDKIT_SETTINGS_PATH, QSettings::IniFormat);
-    setting.beginGroup(QLatin1String(CETDKIT_SETTINGS_PREFIX));
-    int processIndex = setting.value(QLatin1String("processIndex")).toInt();
-    setting.endGroup();
+    m_settings->beginGroup(QLatin1String(CETDKIT_SETTINGS_PREFIX));
+    int processIndex = m_settings->value(QLatin1String("processIndex")).toInt();
+    m_settings->endGroup();
     ui->processComboBox->setCurrentIndex(processIndex);
     doCurrentIndexChanged(processIndex);
 
@@ -93,13 +95,13 @@ QObject *MainWindow::loadPlugin(const QString &dllName)
     }
 
     foreach (const QString &fileName, pluginsDir.entryList(QDir::Files)) {
-        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
-        plugin = pluginLoader.instance();
-        if (plugin) {
-            plugin->setParent(this);
-            if (0 == dllName.compare(fileName, Qt::CaseInsensitive)) {
-                break;
+        if (0 == dllName.compare(fileName, Qt::CaseInsensitive)) {
+            QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
+            plugin = pluginLoader.instance();
+            if (plugin) {
+                plugin->setParent(this);
             }
+            break;
         }
     }
 
@@ -170,10 +172,9 @@ void MainWindow::doCurrentIndexChanged(int index)
     }
     
     qDebug() << "processIndex" << ui->processComboBox->currentIndex();
-    QSettings setting(CETDKIT_SETTINGS_PATH, QSettings::IniFormat);
-    setting.beginGroup(QLatin1String(CETDKIT_SETTINGS_PREFIX));
-    setting.setValue(QLatin1String("processIndex"), ui->processComboBox->currentIndex());
-    setting.endGroup();
+    m_settings->beginGroup(QLatin1String(CETDKIT_SETTINGS_PREFIX));
+    m_settings->setValue(QLatin1String("processIndex"), ui->processComboBox->currentIndex());
+    m_settings->endGroup();
 }
 
 

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QProcess>
+#include <QSettings>
 
 namespace Ui {
 class EC200UConfigure;
@@ -32,6 +33,7 @@ private slots:
 
 private:
     Ui::EC200UConfigure *ui;
+    QSettings *const m_settings;
     QProcess *const m_process;
 };
 

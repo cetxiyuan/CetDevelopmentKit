@@ -2,15 +2,15 @@
 #define VERSION_H
 
 /* 是否为正式版 */
-#define IS_RELEASE_VERSION      ( 1 )
+#define IS_RELEASE_VERSION      ( 0 )
 
 /* 图标 */
 #define PRODUCT_ICON            "favorite.ico"
 
 /* 版本号定义 */
 #define VER_MAJOR               1   /* 主版本号 */
-#define VER_MINOR               0   /* 次版本号 */
-#define VER_MICRO               3   /* 小版本号 */
+#define VER_MINOR               1   /* 次版本号 */
+#define VER_MICRO               0   /* 小版本号 */
 
 /* 版本宏定义 */
 #define VERSION_CHECK(major, minor, micro)  ((major<<16)|(minor<<8)|(micro<<0))
@@ -18,10 +18,10 @@
 #define __STR(var)   #var
 
 /* 正式版发布日期 */
-#define RELEASE_DATE            "(2023-09-13)"
+#define RELEASE_DATE            "(2023-10-27)"
 
 /* 补丁包号(月+日+序号) */
-#define PATCH_PACKET            "8211"
+#define PATCH_PACKET            "b301"
 
 #if (IS_RELEASE_VERSION > 0)
 #define TIP_VERSION             RELEASE_DATE
@@ -52,7 +52,7 @@
 #define ORIGINAL_NAME           APP_NAME ".exe"
 
 /* 产品名称 */
-#define PRODUCT_NAME            APP_NAME "103"
+#define PRODUCT_NAME            APP_NAME "110"
 
 /* 域名 */
 #define ORGANIZATION_DOMAIN     "https://www.cetxiyuan.com/"

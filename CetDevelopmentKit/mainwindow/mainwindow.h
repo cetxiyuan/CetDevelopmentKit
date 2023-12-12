@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QProcess>
+#include <QSettings>
 
 #include "cetlogmanagerinterface.h"
 #include "cetlicenseinterface.h"
@@ -44,6 +45,7 @@ private:
 private:
     Ui::MainWindow *ui;
     CetLogManagerInterface *m_cetLogManagerInterface;
+    QSettings *const m_settings;
     QProcess *const m_cmdProcess;
     EC200UConfigure *const m_ec200uConfigure;
     ADBConfigure *const m_adbConfigure;

@@ -3,17 +3,18 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QSettings>
 #include <QTimer>
+#include <QStandardPaths>
 #include <QDir>
+
 #include <QDebug>
 
-#define ADB_SETTINGS_PATH        "./Settings.ini"
 #define ADB_SETTINGS_PREFIX      "ADBConfig"
 
 ADBConfigure::ADBConfigure(QProcess *process, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ADBConfigure)
+    , m_settings(new QSettings("Configs/ADBConfigure.ini", QSettings::IniFormat))
     , m_process(process)
 {
     ui->setupUi(this);
@@ -21,14 +22,14 @@ ADBConfigure::ADBConfigure(QProcess *process, QWidget *parent) :
     ui->passwordLineEdit->setPlaceholderText(tr("登入设备的密码 ..."));
     ui->devicePackPathLineEdit->setPlaceholderText(tr("设备中的待打包的路径 ..."));
 
-    QSettings setting(ADB_SETTINGS_PATH, QSettings::IniFormat);
-    setting.beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
-    QString toolPath = setting.value(QLatin1String("toolPath")).toString();
-    QString username = setting.value(QLatin1String("username")).toString();
-    QString password = setting.value(QLatin1String("password")).toString();
-    QString packPath = setting.value(QLatin1String("packPath")).toString();
-    QString outputDir = setting.value(QLatin1String("outputDir")).toString();
-    setting.endGroup();
+    QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
+    QString toolPath = m_settings->value(QLatin1String("toolPath")).toString();
+    QString username = m_settings->value(QLatin1String("username")).toString();
+    QString password = m_settings->value(QLatin1String("password")).toString();
+    QString packPath = m_settings->value(QLatin1String("packPath")).toString();
+    QString outputDir = m_settings->value(QLatin1String("outputDir"), desktopPath).toString();
+    m_settings->endGroup();
 
     if (!toolPath.isEmpty()) ui->toolPathLineEdit->setText(toolPath);
     if (!username.isEmpty()) ui->usernameLineEdit->setText(username);
@@ -44,7 +45,13 @@ ADBConfigure::~ADBConfigure()
 
 QString ADBConfigure::startCommand(void)
 {
-    return tr("%1 shell").arg(ui->toolPathLineEdit->text());
+    QString toolPath = ui->toolPathLineEdit->text();
+    if (!QFile::exists(toolPath)) {
+        QMessageBox::warning(this, tr("警告"), 
+            tr("工具路径(%1)：路径无效 ！ ").arg(toolPath));
+        return QString();
+    }
+    return tr("%1 shell").arg(toolPath);
 }
 
 void ADBConfigure::recvHandle(const QByteArray &data)
@@ -87,60 +94,56 @@ void ADBConfigure::recvHandle(const QByteArray &data)
 
 void ADBConfigure::on_exeToolButton_clicked()
 {
-    QSettings setting(ADB_SETTINGS_PATH, QSettings::IniFormat);
-    setting.beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
-    QString toolPath = setting.value(QLatin1String("toolPath")).toString();
-    setting.endGroup();
+    m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
+    QString toolPath = m_settings->value(QLatin1String("toolPath")).toString();
+    m_settings->endGroup();
     
     QString fileName = QFileDialog::getOpenFileName(this, tr("打开一个工具路径"), 
         toolPath, "可执行文件 (*.exe)");
+    qDebug() << "fileName" << fileName;
     if (!fileName.isEmpty()) {
         ui->toolPathLineEdit->setText(fileName);
         
-        setting.beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
-        setting.setValue(QLatin1String("toolPath"), fileName);
-        setting.endGroup();
+        m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
+        m_settings->setValue(QLatin1String("toolPath"), fileName);
+        m_settings->endGroup();
     }
 }
 
 void ADBConfigure::on_usernameLineEdit_textChanged(const QString &arg1)
 {
-    QSettings setting(ADB_SETTINGS_PATH, QSettings::IniFormat);
-    setting.beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
-    setting.setValue(QLatin1String("username"), arg1);
-    setting.endGroup();
+    m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
+    m_settings->setValue(QLatin1String("username"), arg1);
+    m_settings->endGroup();
 }
 
 void ADBConfigure::on_passwordLineEdit_textChanged(const QString &arg1)
 {
-    QSettings setting(ADB_SETTINGS_PATH, QSettings::IniFormat);
-    setting.beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
-    setting.setValue(QLatin1String("password"), arg1);
-    setting.endGroup();
+    m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
+    m_settings->setValue(QLatin1String("password"), arg1);
+    m_settings->endGroup();
 }
 
 void ADBConfigure::on_devicePackPathLineEdit_textChanged(const QString &arg1)
 {
-    QSettings setting(ADB_SETTINGS_PATH, QSettings::IniFormat);
-    setting.beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
-    setting.setValue(QLatin1String("packPath"), arg1);
-    setting.endGroup();
+    m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
+    m_settings->setValue(QLatin1String("packPath"), arg1);
+    m_settings->endGroup();
 }
 
 void ADBConfigure::on_outputToolButton_clicked()
 {
-    QSettings setting(ADB_SETTINGS_PATH, QSettings::IniFormat);
-    setting.beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
-    QString outputDir = setting.value(QLatin1String("outputDir")).toString();
-    setting.endGroup();
+    m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
+    QString outputDir = m_settings->value(QLatin1String("outputDir")).toString();
+    m_settings->endGroup();
     
     QString directory = QFileDialog::getExistingDirectory(this, tr("打开一个输出目录"), outputDir);
     if (!directory.isEmpty()) {
         ui->outputPathLineEdit->setText(directory);
         
-        setting.beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
-        setting.setValue(QLatin1String("outputDir"), directory);
-        setting.endGroup();
+        m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
+        m_settings->setValue(QLatin1String("outputDir"), directory);
+        m_settings->endGroup();
     }
 }
 

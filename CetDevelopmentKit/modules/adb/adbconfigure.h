@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QProcess>
+#include <QSettings>
 
 namespace Ui {
 class ADBConfigure;
@@ -34,7 +35,8 @@ private slots:
 
 private:
     Ui::ADBConfigure *ui;
-    QProcess *m_process;
+    QSettings *const m_settings;
+    QProcess *const m_process;
 };
 
 #endif // ADBCONFIGURE_H
