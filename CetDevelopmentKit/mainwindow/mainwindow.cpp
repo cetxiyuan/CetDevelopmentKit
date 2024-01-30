@@ -88,7 +88,7 @@ MainWindow::~MainWindow()
 QObject *MainWindow::loadPlugin(const QString &dllName)
 {
     QObject *plugin = nullptr;
-    QDir pluginsDir("D:/Program Files (x86)/CetXiyuan/CetToolLibs/plugins");
+    QDir pluginsDir("D:/Program Files (x86)/CetXiyuan/CetToolDLLs/plugins");
 
     if (!pluginsDir.exists()) {
         pluginsDir.setPath("./plugins");
