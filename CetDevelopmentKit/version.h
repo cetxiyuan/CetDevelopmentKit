@@ -10,7 +10,7 @@
 /* 版本号定义 */
 #define VER_MAJOR               1   /* 主版本号 */
 #define VER_MINOR               1   /* 次版本号 */
-#define VER_MICRO               2   /* 小版本号 */
+#define VER_MICRO               3   /* 小版本号 */
 
 /* 版本宏定义 */
 #define VERSION_CHECK(major, minor, micro)  ((major<<16)|(minor<<8)|(micro<<0))
@@ -18,7 +18,7 @@
 #define __STR(var)   #var
 
 /* 正式版发布日期 */
-#define RELEASE_DATE            "(2024-01-30)"
+#define RELEASE_DATE            "(2024-02-18)"
 
 /* 补丁包号(月+日+序号) */
 #define PATCH_PACKET            "b301"
