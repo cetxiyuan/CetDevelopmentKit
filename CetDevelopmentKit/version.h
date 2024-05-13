@@ -9,16 +9,21 @@
 
 /* 版本号定义 */
 #define VER_MAJOR               1   /* 主版本号 */
-#define VER_MINOR               1   /* 次版本号 */
-#define VER_MICRO               3   /* 小版本号 */
+#define VER_MINOR               2   /* 次版本号 */
+#define VER_MICRO               0   /* 小版本号 */
 
 /* 版本宏定义 */
 #define VERSION_CHECK(major, minor, micro)  ((major<<16)|(minor<<8)|(micro<<0))
 #define VERSION_STRING(major, minor, micro) __STR(major) "." __STR(minor) "." __STR(micro)
 #define __STR(var)   #var
 
-/* 正式版发布日期 */
-#define RELEASE_DATE            "(2024-02-18)"
+/* 正式版发布日期 
+ * CXYQK599.CDPK120.EE18 的含义：
+    CXYQK599：CetXiyuan QT Kernel 5.9.9
+    CDPK120：CetDevelopmentKit 120
+    EE18：E(24年, A-20年)E(5月，A-1月)18(13日，18-5(月)=13)
+*/
+#define RELEASE_DATE            "(CXYQK599.CDPK120.EE18)" // "(2024-05-13)"
 
 /* 补丁包号(月+日+序号) */
 #define PATCH_PACKET            "b301"
@@ -52,7 +57,7 @@
 #define ORIGINAL_NAME           APP_NAME ".exe"
 
 /* 产品名称 */
-#define PRODUCT_NAME            APP_NAME "110"
+#define PRODUCT_NAME            APP_NAME "120"
 
 /* 域名 */
 #define ORGANIZATION_DOMAIN     "https://www.cetxiyuan.com/"
