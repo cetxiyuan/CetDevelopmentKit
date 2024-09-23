@@ -5,28 +5,30 @@
 #define IS_RELEASE_VERSION      ( 1 )
 
 /* 图标 */
+#define APP_NAME                "CetDevelopmentKit"
 #define PRODUCT_ICON            "favorite.ico"
 
 /* 版本号定义 */
 #define VER_MAJOR               1   /* 主版本号 */
 #define VER_MINOR               5   /* 次版本号 */
-#define VER_MICRO               1   /* 小版本号 */
+#define VER_MICRO               2   /* 小版本号 */
+
+/* 正式版发布日期 
+ * (CXYQK599.CDPK150.E929) 的含义：
+    CXYQK599: CetXiyuan QT Kernel 5.9.9
+    CDPK150: CetDevelopmentKit 150
+    E932: E(24年, A-20年)9(9月 A-10月 B-11月 C-12月)32(23日 32-9(月)=23)
+*/
+#define RELEASE_DATE            "(CXYQK599.CDPK150.E932)" // "(2024-09-23)"
+
+/* 补丁包号(月+日+序号) */
+#define PATCH_PACKET            "9201"
 
 /* 版本宏定义 */
 #define VERSION_CHECK(major, minor, micro)  ((major<<16)|(minor<<8)|(micro<<0))
 #define VERSION_STRING(major, minor, micro) __STR(major) "." __STR(minor) "." __STR(micro)
+#define DIRECT_STRING(major, minor, micro) __STR(major) __STR(minor) __STR(micro)
 #define __STR(var)   #var
-
-/* 正式版发布日期 
- * CXYQK599.CDPK120.EE18 的含义：
-    CXYQK599：CetXiyuan QT Kernel 5.9.9
-    CDPK120：CetDevelopmentKit 120
-    EE18：E(24年, A-20年)E(5月，A-1月)18(13日，18-5(月)=13)
-*/
-#define RELEASE_DATE            "(CXYQK599.CDPK150.EG25)" // "(2024-07-18)"
-
-/* 补丁包号(月+日+序号) */
-#define PATCH_PACKET            "b301"
 
 #if (IS_RELEASE_VERSION > 0)
 #define TIP_VERSION             RELEASE_DATE
@@ -36,7 +38,6 @@
 #define APP_VERSION             VERSION_STRING(VER_MAJOR, VER_MINOR, VER_MICRO) "." PATCH_PACKET
 #endif
 
-#define APP_NAME                "CetDevelopmentKit"
 #define COMPANY_NAME            "CetXiyuan"
 
 /* 文件版本 */
@@ -51,13 +52,13 @@
 #define FILE_DESCRIPTION        APP_NAME " based on Qt 5.9.9 (MinGW, 32 bit)"
 
 /* 版权 */
-#define LEGAL_COPYRIGHT         "Copyright 2008-2031 The " COMPANY_NAME " Ltd. All rights reserved."
+#define LEGAL_COPYRIGHT         "Copyright 2008-2035 The " COMPANY_NAME " Ltd. All rights reserved."
 
 /* 原始应用名 */
 #define ORIGINAL_NAME           APP_NAME ".exe"
 
 /* 产品名称 */
-#define PRODUCT_NAME            APP_NAME "150"
+#define PRODUCT_NAME            APP_NAME DIRECT_STRING(VER_MAJOR, VER_MINOR, 0)
 
 /* 域名 */
 #define ORGANIZATION_DOMAIN     "https://www.cetxiyuan.com/"
