@@ -10,16 +10,16 @@
 
 /* 版本号定义 */
 #define VER_MAJOR               1   /* 主版本号 */
-#define VER_MINOR               5   /* 次版本号 */
-#define VER_MICRO               2   /* 小版本号 */
+#define VER_MINOR               6   /* 次版本号 */
+#define VER_MICRO               0   /* 小版本号 */
 
 /* 正式版发布日期 
- * (CXYQK599.CDPK150.E929) 的含义：
-    CXYQK599: CetXiyuan QT Kernel 5.9.9
-    CDPK150: CetDevelopmentKit 150
-    E932: E(24年, A-20年)9(9月 A-10月 B-11月 C-12月)32(23日 32-9(月)=23)
+ * (CXYQK5152.CDPK160.EB17) 的含义：
+    CXYQK5152: CetXiyuan QT Kernel 5.15.2
+    CDPK160: CetDevelopmentKit 160
+    EB17: E(24年, A-20年)B(11月 A-10月 B-11月 C-12月)17(06日 17-11(月)=06)
 */
-#define RELEASE_DATE            "(CXYQK599.CDPK150.E932)" // "(2024-09-23)"
+#define RELEASE_DATE            "(CXYQK5152.CDPK160.EB17)" // "(2024-11-06)"
 
 /* 补丁包号(月+日+序号) */
 #define PATCH_PACKET            "9201"
@@ -49,7 +49,7 @@
 #define PRODUCT_VERSION_STR     FILE_VERSION_STR
 
 /* 文件描述 */
-#define FILE_DESCRIPTION        APP_NAME " based on Qt 5.9.9 (MinGW, 32 bit)"
+#define FILE_DESCRIPTION        APP_NAME " based on Qt 5.15.2 (MinGW, 32 bit)"
 
 /* 版权 */
 #define LEGAL_COPYRIGHT         "Copyright 2008-2035 The " COMPANY_NAME " Ltd. All rights reserved."

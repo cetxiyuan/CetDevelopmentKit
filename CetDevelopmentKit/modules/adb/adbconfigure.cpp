@@ -78,7 +78,7 @@ void ADBConfigure::recvHandle(const QByteArray &data)
             QTimer::singleShot(1000, this, [=]() { // 1000ms 后启动进程执行导出压缩包操作
                 QByteArray command = tr("adb pull /tmp/cetmp.tar.gz %1\n").arg(
                     ui->outputPathLineEdit->text()).toUtf8();
-                m_process->start(command);
+                m_process->start(command, QStringList());
                 emit progress(100);
             });
             step = -1;

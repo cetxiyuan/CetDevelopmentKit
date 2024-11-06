@@ -212,7 +212,7 @@ void MainWindow::on_processHandleButton_clicked()
     }
     qDebug() << "command" << command;
     ui->progressBar->setValue(0);
-    m_cmdProcess->start(command);
+    m_cmdProcess->start(command, QStringList());
 }
 
 void MainWindow::on_processConfigureButton_clicked()
