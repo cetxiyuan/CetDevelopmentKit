@@ -2,19 +2,22 @@
 #define ADBCONFIGURE_H
 
 #include <QWidget>
-#include <QProcess>
 #include <QSettings>
 
 namespace Ui {
 class ADBConfigure;
 }
 
+class QProcess;
+class QPlainTextEdit;
+
 class ADBConfigure : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ADBConfigure(QProcess *process, QWidget *parent = nullptr);
+    explicit ADBConfigure(QProcess *process, 
+        QPlainTextEdit *plainTextEdit, QWidget *parent = nullptr);
     ~ADBConfigure();
     QString startCommand(void);
     void recvHandle(const QByteArray &data);
@@ -37,6 +40,8 @@ private:
     Ui::ADBConfigure *ui;
     QSettings *const m_settings;
     QProcess *const m_process;
+    QPlainTextEdit *const m_plainTextEdit;
+    int m_step;
 };
 
 #endif // ADBCONFIGURE_H

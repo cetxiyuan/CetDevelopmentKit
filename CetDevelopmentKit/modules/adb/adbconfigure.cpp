@@ -6,16 +6,20 @@
 #include <QTimer>
 #include <QStandardPaths>
 #include <QDir>
+#include <QDateTime>
+#include <QProcess>
+#include <QPlainTextEdit>
 
 #include <QDebug>
 
 #define ADB_SETTINGS_PREFIX      "ADBConfig"
 
-ADBConfigure::ADBConfigure(QProcess *process, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::ADBConfigure)
+ADBConfigure::ADBConfigure(QProcess *process, QPlainTextEdit *plainTextEdit, QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::ADBConfigure)
     , m_settings(new QSettings("Configs/ADBConfigure.ini", QSettings::IniFormat))
     , m_process(process)
+    , m_plainTextEdit(plainTextEdit)
 {
     ui->setupUi(this);
     ui->usernameLineEdit->setPlaceholderText(tr("登入设备的用户名 ..."));
@@ -51,45 +55,59 @@ QString ADBConfigure::startCommand(void)
             tr("工具路径(%1)：路径无效 ！ ").arg(toolPath));
         return QString();
     }
+    m_step = 0;
     return tr("%1 shell").arg(toolPath);
 }
 
 void ADBConfigure::recvHandle(const QByteArray &data)
 {
-    static int step = 0;
     QByteArray input;
-    if (data.contains("login")) {
+    static QString packPath;
+
+    if (data.contains("ogin")) {
         input = ui->usernameLineEdit->text().toUtf8();
-    } else if (data.contains("Password")) {
+    } else if (data.contains("assword")) {
         input = ui->passwordLineEdit->text().toUtf8();
-        step = 0;
-        emit progress(30);
-    } else if (data.contains(ui->usernameLineEdit->text().toUtf8()) && data.contains("#")) {
-        switch (step) {
-        case 0: { // 打包
-            QString path = ui->devicePackPathLineEdit->text();
-            input = tr("tar -zcf /tmp/cetmp.tar.gz %1/*").arg(path).toUtf8();
-            step = 1;
-            emit progress(50);
+        emit progress(20);
+    } else if (data.contains("#")) {
+        switch (m_step) {
+        case 0: { // 删除 历史打包文件
+            input = tr("rm /tmp/cetmp*.tar.gz").toUtf8();
+            m_step = 1;
+            emit progress(45);
             break;
         }
-        case 1: // 关闭当前通道
+        case 1: { // 打包
+            packPath = tr("/tmp/cetmp_%1.tar.gz").arg(
+                QDateTime::currentDateTime().toString("yyyy-MM-ddThh-mm-ss"));
+            input = tr("tar -zcf %1 %2/*").arg(packPath, ui->devicePackPathLineEdit->text()).toUtf8();
+            m_step = 2;
+            emit progress(65);
+            break;
+        }
+        case 2: // 关闭当前通道
             m_process->close();
             QTimer::singleShot(1000, this, [=]() { // 1000ms 后启动进程执行导出压缩包操作
-                QByteArray command = tr("adb pull /tmp/cetmp.tar.gz %1\n").arg(
-                    ui->outputPathLineEdit->text()).toUtf8();
-                m_process->start(command, QStringList());
+                QString command = tr("%1 pull %2 %3").arg(ui->toolPathLineEdit->text(),
+                    packPath, ui->outputPathLineEdit->text());
+                m_plainTextEdit->appendPlainText("[执行] " + command);
+
+                QString program = command.split(" ").first();
+                QStringList arguments(command.split(" ").mid(1));
+                m_process->start(program, arguments);
                 emit progress(100);
             });
-            step = -1;
-            emit progress(80);
+            m_step = -1;
+            emit progress(85);
             break;
         }
     }
 
     //qDebug() << "data" << data << "input" << input;
-    if (!input.isEmpty()) 
+    if (!input.isEmpty()) {
+        m_plainTextEdit->appendPlainText("[执行] " + input);
         m_process->write(input.append("\n"));
+    }
 }
 
 void ADBConfigure::on_exeToolButton_clicked()

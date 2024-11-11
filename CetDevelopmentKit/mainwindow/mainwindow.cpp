@@ -23,15 +23,15 @@ MainWindow::MainWindow(QWidget *parent)
     , INIT_INTERFACE(m_cetLogManagerInterface, "CetLogManagerPlugin.dll")
     , m_settings(new QSettings("Configs/AppMaster.ini", QSettings::IniFormat))
     , m_cmdProcess(new QProcess(this))
-    , m_ec200uConfigure(new EC200UConfigure(m_cmdProcess))
-    , m_adbConfigure(new ADBConfigure(m_cmdProcess))
-    
 {
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
     QTextCodec::setCodecForLocale(codec);
 
     ui->setupUi(this);
     setWindowTitle(tr(CETDEVELOPMENTKIT_VERSION));
+
+    m_ec200uConfigure = new EC200UConfigure(m_cmdProcess, ui->plainTextEdit);
+    m_adbConfigure = new ADBConfigure(m_cmdProcess, ui->plainTextEdit);
 
     ui->progressBar->setMaximum(100);
     ui->progressBar->setMinimum(0);
@@ -212,7 +212,12 @@ void MainWindow::on_processHandleButton_clicked()
     }
     qDebug() << "command" << command;
     ui->progressBar->setValue(0);
-    m_cmdProcess->start(command, QStringList());
+    ui->plainTextEdit->appendPlainText("[执行] " + command);
+
+    QString program = command.split(" ").first();
+    QStringList arguments(command.split(" ").mid(1));
+    
+    m_cmdProcess->start(program, arguments);
 }
 
 void MainWindow::on_processConfigureButton_clicked()

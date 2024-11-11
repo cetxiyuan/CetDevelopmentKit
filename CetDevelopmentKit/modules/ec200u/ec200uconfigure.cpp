@@ -8,14 +8,16 @@
 #include <QSettings>
 #include <QTextStream>
 #include <QFile>
+#include <QProcess>
 
 #define EC200U_SETTINGS_PREFIX      "EC200UConfig"
 
-EC200UConfigure::EC200UConfigure(QProcess *process, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::EC200UConfigure)
+EC200UConfigure::EC200UConfigure(QProcess *process, QPlainTextEdit *plainTextEdit, QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::EC200UConfigure)
     , m_settings(new QSettings("Configs/EC200UConfigure.ini", QSettings::IniFormat))
     , m_process(process)
+    , m_plainTextEdit(plainTextEdit)
 {
     ui->setupUi(this);
 

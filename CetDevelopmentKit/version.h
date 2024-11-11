@@ -19,7 +19,7 @@
     CDPK160: CetDevelopmentKit 160
     EB17: E(24年, A-20年)B(11月 A-10月 B-11月 C-12月)17(06日 17-11(月)=06)
 */
-#define RELEASE_DATE            "(CXYQK5152.CDPK160.EB17)" // "(2024-11-06)"
+#define RELEASE_DATE            "(CXYQK5152.CDPK160.EB22)" // "(2024-11-11)"
 
 /* 补丁包号(月+日+序号) */
 #define PATCH_PACKET            "9201"

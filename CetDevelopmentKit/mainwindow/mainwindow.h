@@ -47,8 +47,8 @@ private:
     CetLogManagerInterface *m_cetLogManagerInterface;
     QSettings *const m_settings;
     QProcess *const m_cmdProcess;
-    EC200UConfigure *const m_ec200uConfigure;
-    ADBConfigure *const m_adbConfigure;
+    EC200UConfigure *m_ec200uConfigure;
+    ADBConfigure *m_adbConfigure;
     
     CetLicenseInterface *m_cetLicenseInterface;
     CetUpdateInterface *m_cetUpdateInterface;
