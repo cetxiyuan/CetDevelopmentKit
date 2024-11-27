@@ -2,7 +2,7 @@
 ; 有关创建 Inno Setup 脚本文件的详细资料请查阅帮助文档！
 
 #define MyAppName "CetDevelopmentKit"
-#define MyAppVersion "1.6.1"
+#define MyAppVersion "1.6.2"
 #define MyAppPublisher "CetXiyuan"
 #define MyAppURL "https://blog.csdn.net/xiyuan255"
 #define MyAppExeName "CetDevelopmentKit.exe"
