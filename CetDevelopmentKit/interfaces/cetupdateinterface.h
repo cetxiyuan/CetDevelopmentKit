@@ -1,6 +1,7 @@
 #ifndef CETUPDATEINTERFACE_H
 #define CETUPDATEINTERFACE_H
 
+#include <QObject>
 #include <QString>
 
 typedef void ( *callback_t )(void);

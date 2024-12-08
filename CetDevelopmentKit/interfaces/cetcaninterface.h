@@ -1,6 +1,9 @@
 #ifndef CETCANINTERFACE_H
 #define CETCANINTERFACE_H
 
+#include <QObject>
+#include <cstdint>
+
 class CetCANInterface
 {
 public:

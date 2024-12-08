@@ -1,6 +1,8 @@
 #ifndef CETLOGMANAGERINTERFACE_H
 #define CETLOGMANAGERINTERFACE_H
 
+#include <QObject>
+
 class CetLogManagerInterface
 {
 public:

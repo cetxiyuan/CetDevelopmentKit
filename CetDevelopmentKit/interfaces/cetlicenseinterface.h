@@ -1,6 +1,7 @@
 #ifndef CETLICENSEINTERFACE_H
 #define CETLICENSEINTERFACE_H
 
+#include <QObject>
 #include <QString>
 
 class CetLicenseInterface

@@ -1,6 +1,8 @@
 #ifndef CETPROGRESSINTERFACE_H
 #define CETPROGRESSINTERFACE_H
 
+#include <QObject>
+
 class CetProgressInterface
 {
 public:
