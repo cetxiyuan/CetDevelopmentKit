@@ -4,14 +4,19 @@
 
 #include <QMessageBox>
 #include <QPluginLoader>
+#include <QStatusBar>
 #include <QDir>
-#include <QDebug>
+#include <QTimer>
 #include <QTextCodec>
+
+#include <QDebug>
 
 #define INIT_INTERFACE(mInterface, name)    \
     mInterface(qobject_cast<typeof(mInterface)>(loadPlugin(name)))
-#define LOAD_INTERFACE(mInterface, name)    \
-    mInterface = qobject_cast<typeof(mInterface)>(loadPlugin(name))
+#define LOAD_INTERFACE(mInterface, name, isRemind)    \
+    mInterface = qobject_cast<typeof(mInterface)>(loadPlugin(name));    \
+    if (!mInterface && isRemind)    \
+        QMessageBox::warning(this, tr("警告"), tr("缺少 (%1) 库\t").arg(name))
 
 #define CETDEVELOPMENTKIT_VERSION  "Cet开发集成工具包 V" APP_VERSION " " TIP_VERSION
 
@@ -114,43 +119,53 @@ void MainWindow::initFeaturesPlugin()
             m_cetLogManagerInterface->show();
         });
 
-    LOAD_INTERFACE(m_cetLicenseInterface, "CetLicensePlugin.dll");
-    if (!m_cetLicenseInterface) {
-        QMessageBox::warning(this, tr("警告"), tr("缺少 CetLicensePlugin.dll 库\t"));
-    }
-    if (!m_cetLicenseInterface || CetLicenseInterface::ACTIVATE_OK
-            != m_cetLicenseInterface->activate(PRODUCT_NAME)) {
-        this->centralWidget()->setEnabled(false);
-
-        QString expireInfo = tr(" [ 已到期 (%1) (%2) ]").arg(PRODUCT_NAME, 
-            m_cetLicenseInterface? m_cetLicenseInterface->solidKey() : "");
-        this->setWindowTitle(windowTitle().append(expireInfo));
-        this->centralWidget()->setStatusTip(tr("%1 请激活后使用！").arg(expireInfo));
-    }
-    ui->licenseMenu->addAction(tr("激活"), this, [=]() {
+    LOAD_INTERFACE(m_cetLicenseInterface, "CetLicensePlugin.dll", true);
+    if (m_cetLicenseInterface)
+        m_cetLicenseInterface->initialize(PRODUCT_NAME);
+    QAction *activeAction = ui->licenseMenu->addAction(tr("激活"), this, [=]() {
+        int result = 0;
+        bool activated = false;
+        static bool auto_timing_active = true;
         if (m_cetLicenseInterface) {
-            int result = m_cetLicenseInterface->execResult();
-            if (CetLicenseInterface::ACTIVATE_OK == result) {
-                this->setWindowTitle(tr(CETDEVELOPMENTKIT_VERSION));
-                this->centralWidget()->setEnabled(true);
-            }
-
-            if (CetLicenseInterface::ACTIVATE_CANCEL != result) {
-                QMessageBox::information(this, tr("通知"), 
-                    m_cetLicenseInterface->resultString() + "\t", QMessageBox::Ok);
-            }
+            result = (auto_timing_active ? m_cetLicenseInterface->activate()
+                                         : m_cetLicenseInterface->activateWindow());
+            if (CetLicenseInterface::ACTIVATE_CANCEL == result)
+                goto timing_active;
+            activated = (CetLicenseInterface::ACTIVATE_OK == result);
         }
+        if (activated) {
+            this->setWindowTitle(tr(CETDEVELOPMENTKIT_VERSION));
+            this->statusBar()->clearMessage();
+        } else {
+            QString expireInfo = tr("%1 [ 已到期 (%2) (%3) ]").arg(
+                tr(CETDEVELOPMENTKIT_VERSION), PRODUCT_NAME, 
+                m_cetLicenseInterface? m_cetLicenseInterface->solidKey() : "");
+            this->setWindowTitle(expireInfo);
+            this->statusBar()->showMessage(tr("%1 请激活后使用！").arg(expireInfo), 60 * 1000);
+        }
+        this->centralWidget()->setEnabled(activated);
+    
+        if (!auto_timing_active && CetLicenseInterface::ACTIVATE_CANCEL != result) {
+            QMessageBox::information(this, tr("通知"), (m_cetLicenseInterface? 
+                m_cetLicenseInterface->resultString() : "") + "\t", QMessageBox::Ok);
+        }
+    timing_active:
+        auto_timing_active = false;
+        QTimer::singleShot(5 * 24 * 3600 * 1000, this, [=]() {  /* 5 天检查一次 是否到期 */
+            auto_timing_active = true;
+            emit ui->licenseMenu->actions().first()->triggered(true);
+        });
+    });
+    QTimer::singleShot(10 * 1000, this, [=]() {                 /* 上电 10 秒后开始检测激活 */
+        emit activeAction->triggered(true);
     });
 
-    LOAD_INTERFACE(m_cetUpdateInterface, "CetUpdatePlugin.dll");
-    if (!m_cetUpdateInterface) {
-        QMessageBox::warning(this, tr("警告"), tr("缺少 CetUpdatePlugin.dll 库\t"));
-    }
+    LOAD_INTERFACE(m_cetUpdateInterface, "CetUpdatePlugin.dll", true);
     if (m_cetUpdateInterface) {
         m_cetUpdateInterface->checkUpdate(APP_NAME, APP_VERSION, QCoreApplication::quit);
     }
 
-    LOAD_INTERFACE(m_cetProgressInterface, "CetProgressPlugin.dll");
+    LOAD_INTERFACE(m_cetProgressInterface, "CetProgressPlugin.dll", false);
 }
 
 void MainWindow::doCurrentIndexChanged(int index)
