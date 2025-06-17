@@ -11,7 +11,7 @@
 /* 版本号定义 */
 #define VER_MAJOR               1   /* 主版本号 */
 #define VER_MINOR               7   /* 次版本号 */
-#define VER_MICRO               0   /* 小版本号 */
+#define VER_MICRO               1   /* 小版本号 */
 
 /* 正式版发布日期 
  * (CXYQK5152.CDPK160.EB17) 的含义：
@@ -19,7 +19,7 @@
     CDPK160: CetDevelopmentKit 160
     EB17: E(24年, A-20年)B(11月 A-10月 B-11月 C-12月)17(06日 17-11(月)=06)
 */
-#define RELEASE_DATE            "(CXYQK5152.CDPK160.F210)" // "(2025-02-08)"
+#define RELEASE_DATE            "(CXYQK5152.CDPK170.F623)" // "(2025-06-17)"
 
 /* 补丁包号(月+日+序号) */
 #define PATCH_PACKET            "9201"
