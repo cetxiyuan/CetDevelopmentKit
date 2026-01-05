@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 工具包种类
     ui->processComboBox->addItem("EC200U 差分包制作", CONFIG_EC200U_DPATH);
     ui->processComboBox->addItem("ADB 设备数据打包导出", CONFIG_ADB_ZIPEXPORT);
-    
+
     m_settings->beginGroup(QLatin1String(CETDKIT_SETTINGS_PREFIX));
     int processIndex = m_settings->value(QLatin1String("processIndex")).toInt();
     m_settings->endGroup();
@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
         (&QProcess::finished), this, &MainWindow::onProcessFinished);
     connect(m_cmdProcess, &QProcess::readyReadStandardOutput, this, [=]() {
             QByteArray data = m_cmdProcess->readAllStandardOutput();
+//            qDebug() << "StandardOutput:data" << data;
             ui->plainTextEdit->appendPlainText(data);
 
             ConfigType type = ui->processComboBox->currentData().value<ConfigType>();
@@ -75,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent)
         });
     connect(m_cmdProcess, &QProcess::readyReadStandardError, this, [=]() {
             QByteArray data = m_cmdProcess->readAllStandardError();
+//            qDebug() << "StandardError:data" << data;
             ui->plainTextEdit->appendPlainText(data);
         });
 
@@ -208,11 +210,15 @@ void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus
 
 void MainWindow::on_processHandleButton_clicked()
 {
+#if 1
+    m_cmdProcess->close();
+#else
     if (m_cmdProcess->isOpen()) {
         QMessageBox::warning(this, tr("警告"), 
             tr("进程：%1 已经在运行中！").arg(m_cmdProcess->program()));
         return;
     }
+#endif
 
     QString command;
     ConfigType type = ui->processComboBox->currentData().value<ConfigType>();
@@ -229,9 +235,11 @@ void MainWindow::on_processHandleButton_clicked()
     ui->progressBar->setValue(0);
     ui->plainTextEdit->appendPlainText("[执行] " + command);
 
-    QString program = command.split(" ").first();
-    QStringList arguments(command.split(" ").mid(1));
-    
+    QStringList commands = QProcess::splitCommand(command);
+    QString program = commands.first();
+    QStringList arguments(commands.mid(1));
+//    qDebug() << "program" << program << "arguments" << arguments;
+
     m_cmdProcess->start(program, arguments);
 }
 

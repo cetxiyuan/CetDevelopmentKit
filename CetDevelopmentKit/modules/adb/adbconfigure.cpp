@@ -49,14 +49,14 @@ ADBConfigure::~ADBConfigure()
 
 QString ADBConfigure::startCommand(void)
 {
-    QString toolPath = ui->toolPathLineEdit->text();
+    QString toolPath = ui->toolPathLineEdit->text().remove('\"');
     if (!QFile::exists(toolPath)) {
         QMessageBox::warning(this, tr("警告"), 
             tr("工具路径(%1)：路径无效 ！ ").arg(toolPath));
         return QString();
     }
     m_step = 0;
-    return tr("%1 shell").arg(toolPath);
+    return tr("\"%1\" shell").arg(toolPath);
 }
 
 void ADBConfigure::recvHandle(const QByteArray &data)
@@ -92,8 +92,9 @@ void ADBConfigure::recvHandle(const QByteArray &data)
                     packPath, ui->outputPathLineEdit->text());
                 m_plainTextEdit->appendPlainText("[执行] " + command);
 
-                QString program = command.split(" ").first();
-                QStringList arguments(command.split(" ").mid(1));
+                QStringList commands = QProcess::splitCommand(command);
+                QString program = commands.first();
+                QStringList arguments(commands.mid(1));
                 m_process->start(program, arguments);
                 emit progress(100);
             });
@@ -115,13 +116,14 @@ void ADBConfigure::on_exeToolButton_clicked()
     m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
     QString toolPath = m_settings->value(QLatin1String("toolPath")).toString();
     m_settings->endGroup();
-    
+
     QString fileName = QFileDialog::getOpenFileName(this, tr("打开一个工具路径"), 
         toolPath, "可执行文件 (*.exe)");
     qDebug() << "fileName" << fileName;
     if (!fileName.isEmpty()) {
+        fileName = tr("\"%1\"").arg(fileName);
         ui->toolPathLineEdit->setText(fileName);
-        
+
         m_settings->beginGroup(QLatin1String(ADB_SETTINGS_PREFIX));
         m_settings->setValue(QLatin1String("toolPath"), fileName);
         m_settings->endGroup();
