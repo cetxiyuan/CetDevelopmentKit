@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CetDevelopmentKit 软件架构和功能模块说明</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #f5f6f8;
+    color: #1a1a2e;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+  }
+  .page-wrapper {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    position: relative;
+  }
+  #copy-btn {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    background: #4a6fa5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 999;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  #copy-btn:hover { background: #3a5a8a; }
+  #copy-btn.copied { background: #2e7d32; }
+  article {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 40px 48px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  @media (max-width: 860px) {
+    article { padding: 28px 32px; }
+  }
+  @media (max-width: 600px) {
+    article { padding: 48px 16px 20px; }  /* top clears fixed button */
+    #copy-btn {
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+  }
+  h1 { font-size: 1.9em; border-bottom: 2px solid #e0e4ea; padding-bottom: 10px; margin-top: 0; color: #0d1b2a; }
+  h2 { font-size: 1.45em; border-bottom: 1px solid #e8eaed; padding-bottom: 6px; margin-top: 2em; color: #1a2a3a; }
+  h3 { font-size: 1.2em; margin-top: 1.6em; color: #1a2a3a; }
+  h4 { font-size: 1.05em; margin-top: 1.4em; color: #2a3a4a; }
+  p { margin: 0.8em 0; }
+  ul, ol { padding-left: 1.6em; margin: 0.6em 0; }
+  li { margin: 0.3em 0; }
+  hr { border: none; border-top: 1px solid #e0e4ea; margin: 2em 0; }
+  blockquote {
+    margin: 1em 0;
+    padding: 10px 18px;
+    background: #f0f4ff;
+    border-left: 4px solid #4a6fa5;
+    border-radius: 0 6px 6px 0;
+    color: #2a3a5a;
+  }
+  blockquote p { margin: 0; }
+  code {
+    background: #eef0f4;
+    color: #c0392b;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.88em;
+  }
+  pre {
+    background: #f0f2f5;
+    border: 1px solid #dde1e7;
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 1em 0;
+  }
+  pre code {
+    background: none;
+    color: #1a1a2e;
+    padding: 0;
+    font-size: 0.87em;
+    line-height: 1.6;
+  }
+  /* Table wrapper handles horizontal scroll */
+  .table-wrapper {
+    overflow-x: auto;
+    margin: 1em 0;
+    border-radius: 6px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 400px;
+    font-size: 0.93em;
+  }
+  th {
+    background: #e8ecf4;
+    color: #1a2a3a;
+    font-weight: 600;
+    padding: 9px 14px;
+    border: 1px solid #cdd3de;
+    text-align: left;
+  }
+  td {
+    padding: 8px 14px;
+    border: 1px solid #dde1e7;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #f7f8fb; }
+  tr:hover td { background: #eef1f8; }
+  a { color: #4a6fa5; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .doc-footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #888;
+    font-size: 0.85em;
+  }
+</style>
+</head>
+<body>
+<button id="copy-btn" onclick="copyContent()">[ Copy ]</button>
+<div class="page-wrapper">
+  <article id="main-content">
+<h1>CetDevelopmentKit 软件架构和功能模块说明</h1>
+<h2>一、项目概述</h2>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>软件名称</td>
+<td>CetDevelopmentKit（Cet 开发集成工具包）</td>
+</tr>
+<tr>
+<td>当前版本</td>
+<td>V2.3.1</td>
+</tr>
+<tr>
+<td>技术栈</td>
+<td>Qt 5.15.2 / C++11 / MinGW 32-bit / Windows</td>
+</tr>
+<tr>
+<td>作者</td>
+<td>CetXiyuan（笔名）</td>
+</tr>
+<tr>
+<td>官网</td>
+<td>https://www.cetxiyuan.com/</td>
+</tr>
+</tbody>
+</table></div>
+<p>本工具是面向嵌入式/Android 设备开发的桌面端辅助工具，将多个命令行工具的操作封装为 GUI 界面，目前集成两大功能：<strong>EC200U 差分包制作</strong> 和 <strong>ADB 设备数据打包导出</strong>。</p>
+<hr />
+<h2>二、整体架构</h2>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│                     MainWindow（主窗口）                  │
+│                                                          │
+│  ┌──────────────┐   ┌──────────────────────────────────┐ │
+│  │  功能选择     │   │         功能配置面板               │ │
+│  │ ComboBox     │──▶│  EC200UConfigure / ADBConfigure  │ │
+│  └──────────────┘   └──────────────────────────────────┘ │
+│                                                          │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │           QProcess（共享进程实例）                    │  │
+│  │   stdout/stderr → QPlainTextEdit（日志输出区）       │  │
+│  └────────────────────────────────────────────────────┘  │
+│                                                          │
+│  菜单栏：[日志管理] [授权激活]                              │
+└─────────────────────────────────────────────────────────┘
+         │ QPluginLoader 动态加载
+         ▼
+┌─────────────────────────────────────────────────────────┐
+│                      插件层（plugins/）                   │
+│  CetLogManagerPlugin  CetLicensePlugin  CetUpdatePlugin  │
+│  CetProgressPlugin    CetCANPlugin                       │
+└─────────────────────────────────────────────────────────┘
+         │ 动态链接（本地随附）
+         ▼
+┌─────────────────────────────────────────────────────────┐
+│           动态库（CetProductWizard.dll，随程序目录部署）    │
+└─────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>关键设计原则</h3>
+<ol>
+<li><strong>单进程复用</strong>：全局唯一 <code>QProcess</code> 实例由 <code>MainWindow</code> 持有，各功能模块共享，切换功能时 <code>close()</code> 当前进程再复用。</li>
+<li><strong>接口隔离插件</strong>：所有插件通过纯虚接口类（<code>interfaces/</code> 目录）与主程序解耦，主程序仅依赖接口头文件，不依赖插件实现。</li>
+<li><strong>配置即时持久化</strong>：所有用户输入字段变更时立即写入 <code>QSettings</code> INI 文件，无需手动保存。</li>
+</ol>
+<hr />
+<h2>三、目录结构说明</h2>
+<pre><code>CetDevelopmentKit/                  ← 仓库根目录
+├── CetDevelopmentKit/              ← Qt 工程源码目录
+│   ├── CetDevelopmentKit.pro       ← QMake 工程文件（主入口）
+│   ├── main.cpp                    ← 程序入口
+│   ├── version.h                   ← 全局版本号定义
+│   ├── app.rc                      ← Windows 资源文件（图标/版本信息）
+│   ├── interfaces/                 ← 插件接口定义（纯虚类 + Q_DECLARE_INTERFACE）
+│   │   ├── cetlicenseinterface.h
+│   │   ├── cetupdateinterface.h
+│   │   ├── cetlogmanagerinterface.h
+│   │   ├── cetprogressinterface.h
+│   │   └── interfaces.pri
+│   ├── mainwindow/                 ← 主窗口模块
+│   │   ├── mainwindow.h / .cpp
+│   │   ├── mainwindow.ui
+│   │   └── mainwindow.pri
+│   ├── modules/                    ← 功能模块（每个子目录为一个工具模块）
+│   │   ├── modules.pri
+│   │   ├── ec200u/                 ← EC200U 差分包制作模块
+│   │   │   ├── ec200uconfigure.h / .cpp
+│   │   │   ├── ec200uconfigure.ui
+│   │   │   └── ec200u.pri
+│   │   └── adb/                   ← ADB 设备数据导出模块
+│   │       ├── adbconfigure.h / .cpp
+│   │       ├── adbconfigure.ui
+│   │       └── adb.pri
+│   ├── libs/
+│   │   └── CetProductWizard.dll    ← 动态链接库（产品向导，编译时链接）
+│   └── build/                      ← 构建输出目录（不入版本库）
+├── CetDevelopmentKit-Release/      ← 发布运行目录
+│   ├── CetDevelopmentKit.exe
+│   ├── CetProductWizard.dll
+│   ├── plugins/                    ← 运行时插件目录
+│   │   ├── CetLicensePlugin.dll
+│   │   ├── CetUpdatePlugin.dll
+│   │   ├── CetLogManagerPlugin.dll
+│   │   ├── CetProgressPlugin.dll
+│   │   ├── CetCANPlugin.dll
+│   │   └── CetPlugins.ini
+│   ├── Qt5*.dll / lib*.dll         ← Qt 运行时依赖
+│   └── LICENSE/                    ← 授权文件目录
+├── CetDevelopmentKit-Setup/        ← 安装包工程
+│   ├── CetDevelopmentKit.iss       ← Inno Setup 脚本
+│   └── Output/                     ← 生成的安装包 .exe
+└── CetDevelopmentKit-Patch/        ← 补丁包目录
+</code></pre>
+<hr />
+<h2>四、核心模块详解</h2>
+<h3>4.1 主窗口（MainWindow）</h3>
+<p><strong>文件</strong>：<code>mainwindow/mainwindow.h</code> / <code>mainwindow.cpp</code></p>
+<p>主窗口是整个应用的控制中枢，负责：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>职责</th>
+<th>实现方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>功能模块切换</td>
+<td><code>QComboBox</code> 切换，<code>doCurrentIndexChanged()</code> 控制模块显示/隐藏</td>
+</tr>
+<tr>
+<td>进程管理</td>
+<td>唯一 <code>QProcess</code> 实例，<code>on_processHandleButton_clicked()</code> 启动</td>
+</tr>
+<tr>
+<td>日志输出</td>
+<td><code>QPlainTextEdit</code> 展示 stdout/stderr</td>
+</tr>
+<tr>
+<td>进度显示</td>
+<td><code>QProgressBar</code>，由各模块 <code>emit progress(value)</code> 信号驱动</td>
+</tr>
+<tr>
+<td>配置持久化</td>
+<td><code>Configs/AppMaster.ini</code>，记录当前选中的功能索引</td>
+</tr>
+<tr>
+<td>插件加载</td>
+<td><code>loadPlugin()</code> + <code>initFeaturesPlugin()</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>功能切换逻辑</strong>：</p>
+<pre><code>ComboBox 选择 → doCurrentIndexChanged()
+    ├── 清空日志区
+    ├── 隐藏所有功能配置面板
+    ├── 显示对应功能面板（EC200UConfigure 或 ADBConfigure）
+    └── 保存当前选中索引到 AppMaster.ini
+</code></pre>
+<p><strong>进程通信流程</strong>：</p>
+<pre><code>点击执行按钮
+    → 调用当前模块 startCommand() 获取命令行
+    → QProcess::start(program, arguments)
+    → readyReadStandardOutput → 追加到日志区 + 调用模块 recvHandle(data)
+    → readyReadStandardError  → 追加到日志区
+    → finished → 设置进度条 100%，关闭进程
+</code></pre>
+<hr />
+<h3>4.2 EC200U 差分包制作模块</h3>
+<p><strong>文件</strong>：<code>modules/ec200u/ec200uconfigure.h</code> / <code>ec200uconfigure.cpp</code>
+<strong>配置文件</strong>：<code>Configs/EC200UConfigure.ini</code>（键组：<code>EC200UConfig</code>）</p>
+<p><strong>功能</strong>：调用移远 EC200U 官方工具（<code>fotacreate2</code> 命令）生成 OTA 差分升级包（<code>.pac</code> 格式）。</p>
+<p><strong>用户配置项</strong>：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>INI 键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工具路径</td>
+<td><code>toolPath</code></td>
+<td>差分制作工具可执行文件路径</td>
+</tr>
+<tr>
+<td>原固件包</td>
+<td><code>oldPacket</code></td>
+<td>旧版本固件 <code>.pac</code> 文件</td>
+</tr>
+<tr>
+<td>新固件包</td>
+<td><code>newPacket</code></td>
+<td>新版本固件 <code>.pac</code> 文件</td>
+</tr>
+<tr>
+<td>输出目录</td>
+<td><code>outputDir</code></td>
+<td>差分包输出目录（默认桌面）</td>
+</tr>
+<tr>
+<td>输出文件名</td>
+<td>不持久化</td>
+<td>输出文件名（默认 <code>output.pac</code>）</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>生成的命令格式</strong>：</p>
+<pre><code>&lt;工具路径&gt; fotacreate2 --pac &lt;旧固件&gt;,&lt;新固件&gt;,&lt;工具目录&gt;\settingota8910.xml &lt;输出目录&gt;\&lt;输出文件名&gt; -d v
+</code></pre>
+<p><strong>进度处理</strong>：<code>recvHandle()</code> 收到任何输出即直接上报 100%（工具本身无结构化进度输出）。</p>
+<hr />
+<h3>4.3 ADB 设备数据打包导出模块</h3>
+<p><strong>文件</strong>：<code>modules/adb/adbconfigure.h</code> / <code>adbconfigure.cpp</code>
+<strong>配置文件</strong>：<code>Configs/ADBConfigure.ini</code>（键组：<code>ADBConfig</code>）</p>
+<p><strong>功能</strong>：通过 ADB shell 登入 Android 设备，将设备内指定路径打包为 <code>.tar.gz</code> 后拉取到本地。</p>
+<p><strong>用户配置项</strong>：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>INI 键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ADB 工具路径</td>
+<td><code>toolPath</code></td>
+<td><code>adb.exe</code> 路径</td>
+</tr>
+<tr>
+<td>用户名</td>
+<td><code>username</code></td>
+<td>设备 shell 登录用户名</td>
+</tr>
+<tr>
+<td>密码</td>
+<td><code>password</code></td>
+<td>设备 shell 登录密码</td>
+</tr>
+<tr>
+<td>设备打包路径</td>
+<td><code>packPath</code></td>
+<td>设备内待打包的目录路径</td>
+</tr>
+<tr>
+<td>本地输出目录</td>
+<td><code>outputDir</code></td>
+<td>拉取文件保存目录（默认桌面）</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>操作流程（状态机 <code>m_step</code>）</strong>：</p>
+<pre><code>startCommand() → 执行 adb shell（启动交互式 Shell）
+    ↓ 收到 &quot;login&quot;/&quot;Login&quot;
+    写入用户名
+    ↓ 收到 &quot;password&quot;/&quot;Password&quot;  → progress(20%)
+    写入密码
+    ↓ 收到 &quot;#&quot;（Shell 就绪）
+    step=0 → 执行 rm /tmp/cetmp*.tar.gz（清理历史）→ progress(45%)
+    step=1 → 执行 tar -zcf /tmp/cetmp_&lt;时间戳&gt;.tar.gz &lt;打包路径&gt;/* → progress(65%)
+    step=2 → 关闭 shell 连接 → progress(85%)
+           → 延迟 1000ms → 执行 adb pull &lt;设备临时包&gt; &lt;本地输出目录&gt; → progress(100%)
+</code></pre>
+<blockquote>
+<p>关键设计：Shell 交互采用<strong>输出关键词匹配</strong>驱动状态机，通过 <code>QProcess::write()</code> 向 stdin 注入命令，模拟终端交互。</p>
+</blockquote>
+<hr />
+<h2>五、插件系统</h2>
+<h3>5.1 插件加载机制</h3>
+<p><code>MainWindow::loadPlugin()</code> 的搜索优先级：</p>
+<pre><code>1. D:/Program Files (x86)/CetXiyuan/CetToolDLLs/plugins/   ← 开发/共享环境
+2. ./plugins/                                                 ← 发布包随附目录
+</code></pre>
+<p>插件通过 Qt 插件机制（<code>QPluginLoader</code>）加载，须实现对应接口并标注 <code>Q_DECLARE_INTERFACE</code>。</p>
+<h3>5.2 接口清单</h3>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>接口类</th>
+<th>IID</th>
+<th>对应插件</th>
+<th>缺失行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CetLicenseInterface</code></td>
+<td><code>org.qter.plugin.CetLicenseInterface</code></td>
+<td><code>CetLicensePlugin.dll</code></td>
+<td>弹出警告，主界面禁用</td>
+</tr>
+<tr>
+<td><code>CetUpdateInterface</code></td>
+<td><code>org.qter.plugin.CetUpdateInterface</code></td>
+<td><code>CetUpdatePlugin.dll</code></td>
+<td>弹出警告，跳过更新检测</td>
+</tr>
+<tr>
+<td><code>CetLogManagerInterface</code></td>
+<td><code>org.qter.plugin.CetLogManagerInterface</code></td>
+<td><code>CetLogManagerPlugin.dll</code></td>
+<td>构造时加载，不显示警告</td>
+</tr>
+<tr>
+<td><code>CetProgressInterface</code></td>
+<td><code>org.qter.plugin.CetProgressInterface</code></td>
+<td><code>CetProgressPlugin.dll</code></td>
+<td>静默忽略</td>
+</tr>
+</tbody>
+</table></div>
+<h3>5.3 授权激活系统</h3>
+<p>激活以 <code>PRODUCT_NAME</code>（= <code>CetDevelopmentKit</code> + 主次版本号，如 <code>CetDevelopmentKit230</code>）作为产品唯一标识，绑定设备固钥（<code>solidKey()</code>）。</p>
+<p><strong>自动激活时序</strong>：</p>
+<pre><code>程序启动
+    └─ 10秒后 → 首次自动激活
+         ├─ 激活成功：主界面启用，标题栏恢复正常
+         ├─ 激活失败：主界面禁用，标题栏显示到期信息和固钥
+         └─ 30分钟后 → 再次激活（间隔时间每次翻倍：30→60→120→...分钟）
+
+用户手动激活：菜单栏 → [授权激活] → [激活]（弹出激活窗口）
+</code></pre>
+<hr />
+<h2>六、版本号系统</h2>
+<p>版本号在 <code>version.h</code> 中集中管理，两种模式：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>宏</th>
+<th>正式版（IS_RELEASE_VERSION=1）</th>
+<th>补丁版（IS_RELEASE_VERSION=0）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>APP_VERSION</code></td>
+<td><code>2.3.1</code></td>
+<td><code>2.3.1.9201</code></td>
+</tr>
+<tr>
+<td><code>TIP_VERSION</code></td>
+<td><code>(CXYQK5152.CDPK230.G512)</code></td>
+<td><code>(CXYQK5152.CDPK230.G512) Patch-9201</code></td>
+</tr>
+<tr>
+<td><code>PRODUCT_NAME</code></td>
+<td><code>CetDevelopmentKit230</code></td>
+<td><code>CetDevelopmentKit230</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>版本编码说明</strong>（以 <code>CXYQK5152.CDPK230.G512</code> 为例）：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CXYQK5152</code></td>
+<td>CetXiyuan Qt Kernel 5.15.2（Qt 版本）</td>
+</tr>
+<tr>
+<td><code>CDPK230</code></td>
+<td>CetDevelopmentKit 第 230 次构建</td>
+</tr>
+<tr>
+<td><code>G512</code></td>
+<td>G=2026年（A=2020年起），5=5月，12=12日</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>七、配置文件汇总</h2>
+<p>所有配置文件均为 INI 格式，存放于程序运行目录下的 <code>Configs/</code> 子目录：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>QSettings 键组</th>
+<th>持久化内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Configs/AppMaster.ini</code></td>
+<td><code>CETDKITConfig</code></td>
+<td>当前选中功能索引（<code>processIndex</code>）</td>
+</tr>
+<tr>
+<td><code>Configs/EC200UConfigure.ini</code></td>
+<td><code>EC200UConfig</code></td>
+<td>工具路径、原/新固件包路径、输出目录</td>
+</tr>
+<tr>
+<td><code>Configs/ADBConfigure.ini</code></td>
+<td><code>ADBConfig</code></td>
+<td>ADB工具路径、用户名、密码、打包路径、输出目录</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>八、发布构建流程</h2>
+<pre><code>1. 修改 version.h        → 更新 VER_MAJOR/VER_MINOR/VER_MICRO、RELEASE_DATE
+2. Qt Creator 编译        → Release 模式构建（Desktop Qt 5.15.2 MinGW 32bit）
+3. 复制产物               → 将 .exe 覆盖到 CetDevelopmentKit-Release/
+4. 修改 .iss 脚本         → 更新 MyAppVersion 与 version.h 保持一致
+5. Inno Setup 编译        → 生成 CetDevelopmentKit-Setup-Release-V&lt;版本&gt;.exe
+6. Git 提交               → 格式：「发布 V&lt;版本&gt;」
+</code></pre>
+<hr />
+<h2>九、扩展新功能模块的步骤</h2>
+<ol>
+<li>在 <code>modules/</code> 下新建子目录，创建继承 <code>QWidget</code> 的配置类和 <code>.ui</code> 文件</li>
+<li>实现 <code>startCommand()</code> 返回完整命令行，实现 <code>recvHandle()</code> 解析输出并 <code>emit progress()</code></li>
+<li>创建 <code>.pri</code> 文件，并在 <code>modules/modules.pri</code> 中 <code>include</code> 引入</li>
+<li>在 <code>MainWindow::ConfigType</code> 枚举中添加新类型</li>
+<li>在 <code>MainWindow</code> 构造函数中实例化并加入 <code>configureGroupBox</code>，在 <code>processComboBox</code> 中添加条目</li>
+<li>在 <code>doCurrentIndexChanged()</code> 和 <code>on_processHandleButton_clicked()</code> 的 <code>switch</code> 中处理新类型</li>
+</ol>
+  </article>
+  <div class="doc-footer">📄 文档转换 · 笔名 CetXiyuan</div>
+</div>
+<script>
+function copyContent() {
+  var el = document.getElementById('main-content');
+  var text = el.innerText || el.textContent;
+  var btn = document.getElementById('copy-btn');
+  function showCopied() {
+    btn.textContent = '已复制 ✓';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = '[ Copy ]';
+      btn.classList.remove('copied');
+    }, 2000);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showCopied).catch(function() {
+      fallbackCopy(text, showCopied);
+    });
+  } else {
+    fallbackCopy(text, showCopied);
+  }
+}
+function fallbackCopy(text, callback) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); callback(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
