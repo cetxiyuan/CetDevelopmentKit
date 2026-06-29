@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CetDevelopmentKit API 参考</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #fafafa;
+    color: #1e2a3e;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.7;
+    font-size: 15px;
+}
+
+#doc-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 24px 40px;
+}
+
+#doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+#doc-header h1 {
+    font-size: 20px;
+    color: #1e2a3e;
+}
+
+#copy-all-btn {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+#copy-all-btn:hover {
+    background: #1d4ed8;
+}
+
+#doc-content {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 32px 40px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+#doc-content h1 {
+    font-size: 28px;
+    margin-top: 40px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+    color: #1e2a3e;
+}
+
+#doc-content h1:first-child {
+    margin-top: 0;
+}
+
+#doc-content h2 {
+    font-size: 22px;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    color: #2d3748;
+}
+
+#doc-content h3 {
+    font-size: 18px;
+    margin-top: 24px;
+    margin-bottom: 10px;
+    color: #3b3f46;
+}
+
+#doc-content h4 {
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #4a5568;
+}
+
+#doc-content p {
+    margin-bottom: 12px;
+}
+
+#doc-content ul, #doc-content ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+#doc-content li {
+    margin-bottom: 4px;
+}
+
+#doc-content a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+#doc-content a:hover {
+    text-decoration: underline;
+}
+
+/* Tables */
+#doc-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+#doc-content th, #doc-content td {
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+#doc-content th {
+    background: #f6f8fa;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+#doc-content tr:nth-child(even) td {
+    background: #fafbfc;
+}
+
+/* Code blocks */
+.code-block-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.code-block-wrapper pre {
+    background: #282c34;
+    border-radius: 8px;
+    padding: 20px 16px 16px;
+    overflow-x: auto;
+    margin: 0;
+}
+
+#doc-content pre code {
+    color: #abb2bf;
+    font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", "Consolas", "Monaco", monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    tab-size: 4;
+    background: none;
+    padding: 0;
+}
+
+/* Inline code - must override hljs dark theme */
+#doc-content code:not(pre code) {
+    background: #f0f4f8 !important;
+    color: #c7254e !important;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", "Consolas", "Monaco", monospace;
+    font-size: 0.9em;
+}
+
+/* Code copy button */
+.code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: rgba(255,255,255,0.12);
+    color: #abb2bf;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.code-copy-btn:hover {
+    background: rgba(255,255,255,0.22);
+    color: #ffffff;
+}
+
+/* Horizontal rule */
+#doc-content hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 24px 0;
+}
+
+/* Blockquote */
+#doc-content blockquote {
+    border-left: 4px solid #2563eb;
+    padding: 8px 16px;
+    margin: 16px 0;
+    background: #f0f4ff;
+    border-radius: 0 4px 4px 0;
+    color: #4a5568;
+}
+
+/* Toast notification */
+#toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e2a3e;
+    color: #ffffff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 999;
+}
+
+#toast.show {
+    opacity: 1;
+}
+
+/* Footer */
+#doc-footer {
+    text-align: center;
+    padding: 24px 0 8px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+#doc-content pre code.language-mermaid {
+    color: #98c379 !important;
+}
+
+#doc-content td strong {
+    color: #1e2a3e;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    #doc-content {
+        padding: 20px 16px;
+    }
+    #doc-header {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    #doc-content table {
+        font-size: 13px;
+    }
+    #doc-content th, #doc-content td {
+        padding: 6px 8px;
+    }
+}
+</style>
+</head>
+<body>
+<div id="doc-wrapper">
+    <div id="doc-header">
+        <h1>CetDevelopmentKit API 参考</h1>
+        <button id="copy-all-btn" onclick="copyFullDocument()">📄 复制全文</button>
+    </div>
+    <div id="doc-content">
+<h1>CetDevelopmentKit API 参考</h1>
+<h2>一、版本信息</h2>
+<p><strong>当前版本</strong>: V2.4.0</p>
+<h3>版本号</h3>
+<table>
+<thead><tr>
+<th>宏</th>
+<th>值</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`VER_MAJOR`</td>
+<td>2</td>
+<td>主版本号</td>
+</tr>
+<tr>
+<td>`VER_MINOR`</td>
+<td>4</td>
+<td>次版本号</td>
+</tr>
+<tr>
+<td>`VER_MICRO`</td>
+<td>0</td>
+<td>小版本号</td>
+</tr>
+<tr>
+<td>`IS_RELEASE_VERSION`</td>
+<td>1</td>
+<td>是否为正式版（1=正式版，0=补丁版）</td>
+</tr>
+<tr>
+<td>`APP_VERSION`</td>
+<td>`"2.4.0"`</td>
+<td>应用版本字符串</td>
+</tr>
+<tr>
+<td>`TIP_VERSION`</td>
+<td>`"(CXYQK5152.CDPK240.G631)"`</td>
+<td>版本提示字符串</td>
+</tr>
+<tr>
+<td>`PATCH_PACKET`</td>
+<td>`"5251"`</td>
+<td>补丁包号</td>
+</tr>
+</tbody></table>
+<h3>产品信息</h3>
+<table>
+<thead><tr>
+<th>宏</th>
+<th>值</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`APP_NAME`</td>
+<td>`"CetDevelopmentKit"`</td>
+<td>应用名称</td>
+</tr>
+<tr>
+<td>`PRODUCT_NAME`</td>
+<td>`"CetDevelopmentKit240"`</td>
+<td>产品 ID（= APP_NAME + 主版本号 + 次版本号 + "0"）</td>
+</tr>
+<tr>
+<td>`COMPANY_NAME`</td>
+<td>`"CetXiyuan"`</td>
+<td>公司名称</td>
+</tr>
+<tr>
+<td>`PRODUCT_ICON`</td>
+<td>`"favorite.ico"`</td>
+<td>应用图标文件</td>
+</tr>
+<tr>
+<td>`ORGANIZATION_DOMAIN`</td>
+<td>`"https://www.cetxiyuan.com/"`</td>
+<td>公司域名</td>
+</tr>
+</tbody></table>
+<h3>版本工具宏</h3>
+<table>
+<thead><tr>
+<th>宏</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`VERSION_CHECK(major, minor, micro)`</td>
+<td>将版本号编码为整数：`(major<<16)</td>
+<td>(minor<<8)</td>
+<td>(micro)`</td>
+</tr>
+<tr>
+<td>`VERSION_STRING(major, minor, micro)`</td>
+<td>将版本号编码为字符串：`"major.minor.micro"`</td>
+</tr>
+<tr>
+<td>`DIRECT_STRING(major, minor, micro)`</td>
+<td>将版本号直接拼接：`"majorminormicro"`</td>
+</tr>
+</tbody></table>
+<h3>文件版本信息</h3>
+<table>
+<thead><tr>
+<th>宏</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`FILE_VERSION`</td>
+<td>Windows 文件版本（`2,4,0`）</td>
+</tr>
+<tr>
+<td>`FILE_VERSION_STR`</td>
+<td>文件版本字符串</td>
+</tr>
+<tr>
+<td>`FILE_DESCRIPTION`</td>
+<td>文件描述（"CetDevelopmentKit based on Qt 5.15.2 (MinGW, 32 bit)"）</td>
+</tr>
+<tr>
+<td>`LEGAL_COPYRIGHT`</td>
+<td>版权信息</td>
+</tr>
+<tr>
+<td>`ORIGINAL_NAME`</td>
+<td>原始文件名（"CetDevelopmentKit.exe"）</td>
+</tr>
+</tbody></table>
+<h3>版本编码说明</h3>
+<p>以 <code>RELEASE_DATE</code> 宏 <code>(CXYQK5152.CDPK240.G631)</code> 为例：</p>
+<table>
+<thead><tr>
+<th>段</th>
+<th>含义</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`CXYQK5152`</td>
+<td>CetXiyuan Qt Kernel 5.15.2（Qt 版本）</td>
+</tr>
+<tr>
+<td>`CDPK240`</td>
+<td>CetDevelopmentKit 第 240 次构建</td>
+</tr>
+<tr>
+<td>`G631`</td>
+<td>G=2026年（A=2020年起），6=6月，31编码为 31−6=25 即 25日</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>二、核心类</h2>
+<h3>2.1 MainWindow</h3>
+<p><strong>头文件</strong>: <code>mainwindow/mainwindow.h</code></p>
+<p><strong>用途</strong>: 应用程序主窗口，负责插件加载、功能模块管理、进程生命周期控制和许可证激活调度。</p>
+<p><strong>继承关系</strong>: <code>QMainWindow</code></p>
+<h4>公共枚举</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">enum ConfigType {
+    CONFIG_EC200U_DPATH = 0,   // EC200U 差分包制作
+    CONFIG_ADB_ZIPEXPORT,      // ADB 设备数据打包导出
+};
+Q_ENUM(ConfigType)             // 注册到 Qt 元对象系统，支持 currentData().value&lt;ConfigType&gt;()</code></pre></div>
+<h4>构造函数</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">MainWindow(QWidget *parent = nullptr);</code></pre></div>
+<p>初始化顺序：
+1. 加载 <code>CetLogManagerPlugin.dll</code> 插件
+2. 创建 <code>QSettings("Configs/AppMaster.ini", QSettings::IniFormat)</code>
+3. 创建 <code>QProcess</code>
+4. 设置 UTF-8 编码
+5. 初始化 UI，创建 <code>EC200UConfigure</code> 和 <code>ADBConfigure</code> 子模块
+6. 连接所有信号/槽
+7. 调用 <code>initFeaturesPlugin()</code> 加载其余插件并启动激活时序</p>
+<h4>析构函数</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">~MainWindow();</code></pre></div>
+<p>清理 <code>m_cmdProcess</code> 和 UI 资源。</p>
+<h4>私有方法</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">QObject *loadPlugin(const QString &amp;dllName);</code></pre></div>
+<p>从插件目录加载指定 DLL 插件。</p>
+<p><strong>参数</strong>:</p>
+<ul>
+<li><code>dllName</code> — 插件 DLL 文件名（如 <code>"CetLicensePlugin.dll"</code>）</li>
+</ul>
+<p><strong>返回值</strong>: 插件实例的 <code>QObject*</code> 指针，加载失败返回 <code>nullptr</code>。</p>
+<p><strong>加载路径优先级</strong>:
+1. <code>D:/Program Files (x86)/CetXiyuan/CetToolDLLs/plugins/</code>
+2. <code>./plugins/</code>（相对于可执行文件目录）</p>
+<h4>私有方法</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">void initFeaturesPlugin();</code></pre></div>
+<p>初始化所有功能插件，包括：</p>
+<ul>
+<li>配置日志管理菜单项</li>
+<li>加载许可证插件并设置激活时序（30 秒首次 + 指数退避）</li>
+<li>加载更新检测插件并检查更新</li>
+<li>加载进度显示插件</li>
+</ul>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">void doCurrentIndexChanged(int index);</code></pre></div>
+<p><strong>槽函数</strong>，响应 <code>QComboBox::currentIndexChanged</code>。根据选中的功能模块切换显示对应的配置面板，并保存选择到 <code>QSettings</code>。</p>
+<h4>私有槽</h4>
+<table>
+<thead><tr>
+<th>槽</th>
+<th>签名</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`onProcessFinished`</td>
+<td>`(int exitCode, QProcess::ExitStatus exitStatus)`</td>
+<td>进程结束处理：正常退出置进度条 100%，异常退出记录日志</td>
+</tr>
+<tr>
+<td>`on_processHandleButton_clicked`</td>
+<td>`()`</td>
+<td>执行按钮：关闭当前进程 → 获取命令 → 启动新进程</td>
+</tr>
+<tr>
+<td>`on_processConfigureButton_clicked`</td>
+<td>`()`</td>
+<td>配置按钮：折叠/展开配置面板</td>
+</tr>
+</tbody></table>
+<h4>关键 Lambda 连接</h4>
+<p><strong>进程标准输出处理</strong>（在构造函数中连接）:</p>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">connect(m_cmdProcess, &amp;QProcess::readyReadStandardOutput, this, [=]() {
+    QByteArray data = m_cmdProcess-&gt;readAllStandardOutput();
+    ui-&gt;plainTextEdit-&gt;appendPlainText(data);
+    ConfigType type = ui-&gt;processComboBox-&gt;currentData().value&lt;ConfigType&gt;();
+    switch (type) {
+    case CONFIG_EC200U_DPATH: m_ec200uConfigure-&gt;recvHandle(data); break;
+    case CONFIG_ADB_ZIPEXPORT: m_adbConfigure-&gt;recvHandle(data); break;
+    }
+});</code></pre></div>
+<p><strong>进程标准错误处理</strong>（在构造函数中连接）:</p>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">connect(m_cmdProcess, &amp;QProcess::readyReadStandardError, this, [=]() {
+    QByteArray data = m_cmdProcess-&gt;readAllStandardError();
+    ui-&gt;plainTextEdit-&gt;appendPlainText(data);
+});</code></pre></div>
+<p><strong>激活定时器</strong>（在 <code>initFeaturesPlugin()</code> 中设置）:</p>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">// 首次激活：30 秒后
+QTimer::singleShot(30 * 1000, this, [=]() {
+    emit activeAction-&gt;triggered(true);
+});
+
+// 重试激活：指数退避
+QTimer::singleShot(auto_timing_msec, this, [=]() {
+    auto_timing_active = true;
+    auto_timing_msec = auto_timing_msec * 2;  // 30min → 60min → 120min ...
+    emit activeAction-&gt;triggered(true);
+});</code></pre></div>
+<h4>关键成员变量</h4>
+<table>
+<thead><tr>
+<th>变量</th>
+<th>类型</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`ui`</td>
+<td>`Ui::MainWindow*`</td>
+<td>UI 自动生成类</td>
+</tr>
+<tr>
+<td>`m_cetLogManagerInterface`</td>
+<td>`CetLogManagerInterface*`</td>
+<td>日志管理插件</td>
+</tr>
+<tr>
+<td>`m_settings`</td>
+<td>`QSettings* const`</td>
+<td>全局配置（INI 文件）</td>
+</tr>
+<tr>
+<td>`m_cmdProcess`</td>
+<td>`QProcess* const`</td>
+<td>共享进程实例</td>
+</tr>
+<tr>
+<td>`m_ec200uConfigure`</td>
+<td>`EC200UConfigure*`</td>
+<td>EC200U 功能模块</td>
+</tr>
+<tr>
+<td>`m_adbConfigure`</td>
+<td>`ADBConfigure*`</td>
+<td>ADB 功能模块</td>
+</tr>
+<tr>
+<td>`m_cetLicenseInterface`</td>
+<td>`CetLicenseInterface*`</td>
+<td>许可证插件</td>
+</tr>
+<tr>
+<td>`m_cetUpdateInterface`</td>
+<td>`CetUpdateInterface*`</td>
+<td>更新检测插件</td>
+</tr>
+<tr>
+<td>`m_cetProgressInterface`</td>
+<td>`CetProgressInterface*`</td>
+<td>进度显示插件</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>2.2 EC200UConfigure</h3>
+<p><strong>头文件</strong>: <code>modules/ec200u/ec200uconfigure.h</code></p>
+<p><strong>用途</strong>: 配置 EC200U 模块的 OTA 差分升级包制作参数，验证路径有效性，生成 <code>fotacreate2</code> 命令。</p>
+<p><strong>继承关系</strong>: <code>QWidget</code></p>
+<h4>构造函数</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">explicit EC200UConfigure(QProcess *process,
+    QPlainTextEdit *plainTextEdit, QWidget *parent = nullptr);</code></pre></div>
+<p><strong>参数</strong>:</p>
+<ul>
+<li><code>process</code> — 共享的 QProcess 实例（仅持有引用，不负责生命周期）</li>
+<li><code>plainTextEdit</code> — 日志输出控件</li>
+<li><code>parent</code> — 父控件</li>
+</ul>
+<p>初始化时从 <code>Configs/EC200UConfigure.ini</code> 恢复上次配置。</p>
+<h4>公共方法</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">QString startCommand();</code></pre></div>
+<p>验证并构造命令行。</p>
+<p><strong>验证内容</strong>:</p>
+<ul>
+<li><code>toolPath</code> 路径是否存在</li>
+<li><code>oldPacket</code> 路径是否存在</li>
+<li><code>newPacket</code> 路径是否存在</li>
+<li><code>outputName</code> 为空时自动填充 <code>"output.pac"</code></li>
+</ul>
+<p><strong>返回值</strong>: 构造的命令行字符串，格式为：</p>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code>&lt;toolPath&gt; fotacreate2 --pac &lt;oldPacket&gt;,&lt;newPacket&gt;,&lt;settingDir&gt;\setting\fota8910.xml &lt;outputDir&gt;\&lt;outputName&gt; -d v</code></pre></div>
+<p>验证失败返回空字符串并弹出警告。</p>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">void recvHandle(const QByteArray &amp;data);</code></pre></div>
+<p>接收进程输出数据。当前实现直接发送 <code>progress(100)</code> 信号。</p>
+<p><strong>参数</strong>:</p>
+<ul>
+<li><code>data</code> — 进程标准输出数据（当前未使用）</li>
+</ul>
+<h4>信号</h4>
+<table>
+<thead><tr>
+<th>信号</th>
+<th>签名</th>
+<th>触发时机</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`progress`</td>
+<td>`void progress(int value)`</td>
+<td>`recvHandle()` 被调用时，发送值 100</td>
+</tr>
+</tbody></table>
+<h4>私有槽</h4>
+<table>
+<thead><tr>
+<th>槽</th>
+<th>触发时机</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`on_toolPathButton_clicked()`</td>
+<td>点击工具路径浏览按钮 → 打开文件对话框 → 保存到 QSettings</td>
+</tr>
+<tr>
+<td>`on_oldPacketButton_clicked()`</td>
+<td>点击原固件包浏览按钮 → 打开 `.pac` 文件对话框 → 保存到 QSettings</td>
+</tr>
+<tr>
+<td>`on_newPacketButton_clicked()`</td>
+<td>点击新固件包浏览按钮 → 打开 `.pac` 文件对话框 → 保存到 QSettings</td>
+</tr>
+<tr>
+<td>`on_outputDirButton_clicked()`</td>
+<td>点击输出目录浏览按钮 → 打开目录对话框 → 保存到 QSettings</td>
+</tr>
+</tbody></table>
+<h4>关键成员变量</h4>
+<table>
+<thead><tr>
+<th>变量</th>
+<th>类型</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`ui`</td>
+<td>`Ui::EC200UConfigure*`</td>
+<td>UI 自动生成类</td>
+</tr>
+<tr>
+<td>`m_settings`</td>
+<td>`QSettings* const`</td>
+<td>配置持久化（`Configs/EC200UConfigure.ini`）</td>
+</tr>
+<tr>
+<td>`m_process`</td>
+<td>`QProcess* const`</td>
+<td>进程引用（由 MainWindow 管理）</td>
+</tr>
+<tr>
+<td>`m_plainTextEdit`</td>
+<td>`QPlainTextEdit* const`</td>
+<td>日志输出控件引用</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>2.3 ADBConfigure</h3>
+<p><strong>头文件</strong>: <code>modules/adb/adbconfigure.h</code></p>
+<p><strong>用途</strong>: 通过 ADB Shell 交互式会话实现设备数据打包并拉取到本地，使用状态机驱动 Shell 交互。</p>
+<p><strong>继承关系</strong>: <code>QWidget</code></p>
+<h4>构造函数</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">explicit ADBConfigure(QProcess *process,
+    QPlainTextEdit *plainTextEdit, QWidget *parent = nullptr);</code></pre></div>
+<p><strong>参数</strong>:</p>
+<ul>
+<li><code>process</code> — 共享的 QProcess 实例</li>
+<li><code>plainTextEdit</code> — 日志输出控件</li>
+<li><code>parent</code> — 父控件</li>
+</ul>
+<p>初始化时从 <code>Configs/ADBConfigure.ini</code> 恢复上次配置。</p>
+<h4>公共方法</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">QString startCommand();</code></pre></div>
+<p>验证 ADB 工具路径有效性，初始化 <code>m_step = 0</code>，返回 <code>"&lt;adbPath&gt;" shell</code> 命令。</p>
+<p><strong>返回值</strong>: ADB shell 命令字符串（路径带引号）。验证失败返回空字符串。</p>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">void recvHandle(const QByteArray &amp;data);</code></pre></div>
+<p>状态机驱动的 Shell 交互处理。</p>
+<p><strong>状态机流程</strong>:</p>
+<table>
+<thead><tr>
+<th>条件</th>
+<th>动作</th>
+<th>m_step</th>
+<th>progress</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>数据包含 `"ogin"`</td>
+<td>发送用户名</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>数据包含 `"assword"`</td>
+<td>发送密码</td>
+<td>—</td>
+<td>20</td>
+</tr>
+<tr>
+<td>数据包含 `"#"` 且 step=0</td>
+<td>发送 `rm /tmp/cetmp*.tar.gz`</td>
+<td>1</td>
+<td>45</td>
+</tr>
+<tr>
+<td>数据包含 `"#"` 且 step=1</td>
+<td>发送 `tar -zcf /tmp/cetmp_xxx.tar.gz path/*`</td>
+<td>2</td>
+<td>65</td>
+</tr>
+<tr>
+<td>数据包含 `"#"` 且 step=2</td>
+<td>关闭 Shell，1 秒后执行 `adb pull`</td>
+<td>-1</td>
+<td>85</td>
+</tr>
+</tbody></table>
+<p>adb pull 命令格式：</p>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code>&lt;adbPath&gt; pull /tmp/cetmp_&lt;timestamp&gt;.tar.gz &lt;outputPath&gt;</code></pre></div>
+<h4>信号</h4>
+<table>
+<thead><tr>
+<th>信号</th>
+<th>签名</th>
+<th>触发时机</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`progress`</td>
+<td>`void progress(int value)`</td>
+<td>各步骤完成时: 20（登录完成）、45（清理完成）、65（打包完成）、85/100（拉取完成）</td>
+</tr>
+</tbody></table>
+<h4>私有槽</h4>
+<table>
+<thead><tr>
+<th>槽</th>
+<th>触发时机</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`on_exeToolButton_clicked()`</td>
+<td>浏览 ADB 工具路径 → 保存到 QSettings（路径自动加引号）</td>
+</tr>
+<tr>
+<td>`on_usernameLineEdit_textChanged(const QString &arg1)`</td>
+<td>用户名输入框文本变化 → 实时保存到 QSettings</td>
+</tr>
+<tr>
+<td>`on_passwordLineEdit_textChanged(const QString &arg1)`</td>
+<td>密码输入框文本变化 → 实时保存到 QSettings</td>
+</tr>
+<tr>
+<td>`on_devicePackPathLineEdit_textChanged(const QString &arg1)`</td>
+<td>设备打包路径输入框文本变化 → 实时保存到 QSettings</td>
+</tr>
+<tr>
+<td>`on_outputToolButton_clicked()`</td>
+<td>浏览输出目录 → 保存到 QSettings</td>
+</tr>
+</tbody></table>
+<h4>关键成员变量</h4>
+<table>
+<thead><tr>
+<th>变量</th>
+<th>类型</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`ui`</td>
+<td>`Ui::ADBConfigure*`</td>
+<td>UI 自动生成类</td>
+</tr>
+<tr>
+<td>`m_settings`</td>
+<td>`QSettings* const`</td>
+<td>配置持久化（`Configs/ADBConfigure.ini`）</td>
+</tr>
+<tr>
+<td>`m_process`</td>
+<td>`QProcess* const`</td>
+<td>进程引用（由 MainWindow 管理）</td>
+</tr>
+<tr>
+<td>`m_plainTextEdit`</td>
+<td>`QPlainTextEdit* const`</td>
+<td>日志输出控件引用</td>
+</tr>
+<tr>
+<td>`m_step`</td>
+<td>`int`</td>
+<td>状态机步骤号（-1 = 流程结束）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>三、插件接口</h2>
+<h3>3.1 CetLicenseInterface</h3>
+<p><strong>头文件</strong>: <code>interfaces/cetlicenseinterface.h</code></p>
+<p><strong>接口标识</strong>: <code>"org.qter.plugin.CetLicenseInterface"</code></p>
+<p><strong>用途</strong>: 定义产品授权激活的抽象契约。</p>
+<h4>枚举</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">enum ActivateResult {
+    ACTIVATE_CANCEL = 0,   // 激活取消
+    ACTIVATE_OK,           // 激活成功
+    ACTIVATE_ER            // 激活失败
+};</code></pre></div>
+<h4>纯虚方法</h4>
+<table>
+<thead><tr>
+<th>方法</th>
+<th>签名</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`initialize`</td>
+<td>`virtual void initialize(const QString &productId) = 0`</td>
+<td>通过产品 ID 初始化激活环境</td>
+</tr>
+<tr>
+<td>`activate`</td>
+<td>`virtual int activate() = 0`</td>
+<td>非窗口式激活（后台自动），返回 `ActivateResult`</td>
+</tr>
+<tr>
+<td>`activateWindow`</td>
+<td>`virtual int activateWindow() = 0`</td>
+<td>窗口式激活（用户手动），返回 `ActivateResult`</td>
+</tr>
+<tr>
+<td>`resultString`</td>
+<td>`virtual QString resultString() = 0`</td>
+<td>获取激活结果描述文本</td>
+</tr>
+<tr>
+<td>`solidKey`</td>
+<td>`virtual QString solidKey() = 0`</td>
+<td>获取产品固钥</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>3.2 CetUpdateInterface</h3>
+<p><strong>头文件</strong>: <code>interfaces/cetupdateinterface.h</code></p>
+<p><strong>接口标识</strong>: <code>"org.qter.plugin.CetUpdateInterface"</code></p>
+<p><strong>用途</strong>: 定义在线更新检测的抽象契约。</p>
+<h4>回调类型</h4>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">typedef void (*callback_t)(void);</code></pre></div>
+<h4>纯虚方法</h4>
+<table>
+<thead><tr>
+<th>方法</th>
+<th>签名</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`checkUpdate`</td>
+<td>`virtual void checkUpdate(const QString &appName, const QString &appVersion, callback_t callback = nullptr) = 0`</td>
+<td>检测服务器是否存在新版本</td>
+</tr>
+<tr>
+<td>`inUpdating`</td>
+<td>`virtual bool inUpdating(QString &newVersion) = 0`</td>
+<td>查询是否正在更新中，返回新版本号</td>
+</tr>
+</tbody></table>
+<p><strong>参数</strong>:</p>
+<ul>
+<li><code>appName</code> — 应用名称（如 <code>"CetDevelopmentKit"</code>）</li>
+<li><code>appVersion</code> — 当前版本号（如 <code>"2.4.0"</code>）</li>
+<li><code>callback</code> — 可选回调函数，更新完成后调用（如 <code>QCoreApplication::quit</code>）</li>
+<li><code>newVersion</code> — 输出参数，新版本号</li>
+</ul>
+<hr>
+<h3>3.3 CetLogManagerInterface</h3>
+<p><strong>头文件</strong>: <code>interfaces/cetlogmanagerinterface.h</code></p>
+<p><strong>接口标识</strong>: <code>"org.qter.plugin.CetLogManagerInterface"</code></p>
+<p><strong>用途</strong>: 定义日志管理窗口的抽象契约。</p>
+<h4>纯虚方法</h4>
+<table>
+<thead><tr>
+<th>方法</th>
+<th>签名</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`show`</td>
+<td>`virtual void show() = 0`</td>
+<td>显示日志管理控制窗口</td>
+</tr>
+</tbody></table>
+<hr>
+<h3>3.4 CetProgressInterface</h3>
+<p><strong>头文件</strong>: <code>interfaces/cetprogressinterface.h</code></p>
+<p><strong>接口标识</strong>: <code>"org.qter.plugin.CetProgressInterface"</code></p>
+<p><strong>用途</strong>: 定义进度显示插件的抽象契约（当前为空接口，预留扩展）。</p>
+<hr>
+<h2>四、配置文件格式</h2>
+<h3>Configs/AppMaster.ini</h3>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-ini">[CETDKITConfig]
+processIndex=&lt;int&gt;     ; 当前选中的功能模块索引（0=EC200U, 1=ADB）</code></pre></div>
+<h3>Configs/EC200UConfigure.ini</h3>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-ini">[EC200UConfig]
+toolPath=&lt;string&gt;      ; fotacreate2 工具路径
+oldPacket=&lt;string&gt;     ; 原固件包路径
+newPacket=&lt;string&gt;     ; 新固件包路径
+outputDir=&lt;string&gt;     ; 输出目录</code></pre></div>
+<h3>Configs/ADBConfigure.ini</h3>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-ini">[ADBConfig]
+toolPath=&lt;string&gt;      ; ADB 可执行文件路径
+username=&lt;string&gt;      ; 设备登录用户名
+password=&lt;string&gt;      ; 设备登录密码
+packPath=&lt;string&gt;      ; 设备中待打包路径
+outputDir=&lt;string&gt;     ; 本地输出目录</code></pre></div>
+<hr>
+<h2>五、信号/槽连接总览</h2>
+<h3>MainWindow 构造函数中建立的连接</h3>
+<table>
+<thead><tr>
+<th>发送者</th>
+<th>信号</th>
+<th>接收者</th>
+<th>槽/处理</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>`m_cmdProcess`</td>
+<td>`finished(int, QProcess::ExitStatus)`</td>
+<td>`MainWindow`</td>
+<td>`onProcessFinished`</td>
+</tr>
+<tr>
+<td>`m_cmdProcess`</td>
+<td>`readyReadStandardOutput`</td>
+<td>`MainWindow`</td>
+<td>lambda（显示 + 路由到模块）</td>
+</tr>
+<tr>
+<td>`m_cmdProcess`</td>
+<td>`readyReadStandardError`</td>
+<td>`MainWindow`</td>
+<td>lambda（显示到日志区）</td>
+</tr>
+<tr>
+<td>`m_ec200uConfigure`</td>
+<td>`progress(int)`</td>
+<td>`ui->progressBar`</td>
+<td>`setValue`</td>
+</tr>
+<tr>
+<td>`m_adbConfigure`</td>
+<td>`progress(int)`</td>
+<td>`ui->progressBar`</td>
+<td>`setValue`</td>
+</tr>
+<tr>
+<td>`ui->processComboBox`</td>
+<td>`currentIndexChanged(int)`</td>
+<td>`MainWindow`</td>
+<td>`doCurrentIndexChanged`</td>
+</tr>
+<tr>
+<td>`ui->processHandleButton`</td>
+<td>`clicked()`</td>
+<td>`MainWindow`</td>
+<td>`on_processHandleButton_clicked`</td>
+</tr>
+<tr>
+<td>`ui->processConfigureButton`</td>
+<td>`clicked()`</td>
+<td>`MainWindow`</td>
+<td>`on_processConfigureButton_clicked`</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>六、内部宏定义</h2>
+<h3>mainwindow.cpp 中的加载宏</h3>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">#define INIT_INTERFACE(mInterface, name)    \
+    mInterface(qobject_cast&lt;typeof(mInterface)&gt;(loadPlugin(name)))
+
+#define LOAD_INTERFACE(mInterface, name, isRemind)    \
+    mInterface = qobject_cast&lt;typeof(mInterface)&gt;(loadPlugin(name));    \
+    if (!mInterface &amp;&amp; isRemind)    \
+        QMessageBox::warning(this, tr("警告"), tr("缺少 (%1) 库\t").arg(name))</code></pre></div>
+<p><strong>用途</strong>:</p>
+<ul>
+<li><code>INIT_INTERFACE</code> — 在构造函数初始化列表中使用，加载插件并赋值给成员变量</li>
+<li><code>LOAD_INTERFACE</code> — 在函数体内使用，加载插件并赋值，<code>isRemind=true</code> 时缺失会弹窗警告</li>
+</ul>
+<blockquote><strong>注意</strong>：宏中的 <code>typeof</code> 是 GCC 扩展（非 ISO C++），MinGW 编译器支持。若移植到 MSVC 需替换为 <code>decltype</code>。</blockquote>
+<h3>模块配置前缀宏</h3>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-cpp">#define CETDKIT_SETTINGS_PREFIX      "CETDKITConfig"
+#define EC200U_SETTINGS_PREFIX      "EC200UConfig"
+#define ADB_SETTINGS_PREFIX         "ADBConfig"</code></pre></div>
+<p><strong>用途</strong>: 统一管理各模块的 QSettings 键组名称。<code>CETDKIT_SETTINGS_PREFIX</code> 在 <code>mainwindow.cpp</code> 中定义，其余在各自模块的 <code>.cpp</code> 文件中定义。</p>
+    </div>
+    <div id="doc-footer">📄 文档转换 · 筆名 CetXiyuan</div>
+</div>
+<div id="toast"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#doc-content pre code').forEach(function(block) {
+        if (!block.classList.contains('language-mermaid')) {
+            hljs.highlightElement(block);
+        }
+    });
+});
+
+function copyCode(btn) {
+    const codeBlock = btn.parentElement.querySelector('code');
+    const text = codeBlock.textContent;
+    navigator.clipboard.writeText(text).then(function() {
+        showToast('✅ 已复制代码');
+    });
+}
+
+function copyFullDocument() {
+    const content = document.getElementById('doc-content');
+    const text = content.innerText;
+    navigator.clipboard.writeText(text).then(function() {
+        showToast('✅ 已复制全文');
+    });
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(function() {
+        toast.classList.remove('show');
+    }, 2000);
+}
+</script>
+</body>
+</html>
