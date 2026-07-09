@@ -24,7 +24,8 @@ RC_FILE += app.rc
 INCLUDEPATH += \
         $$PWD/mainwindow \
         $$PWD/modules \
-        $$PWD/interfaces
+        $$PWD/interfaces \
+        $$PWD/../../CetToolDLLs/CetToolPlugins
 
 include ($$PWD/mainwindow/mainwindow.pri)
 include ($$PWD/modules/modules.pri)
