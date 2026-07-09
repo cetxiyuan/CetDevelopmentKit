@@ -1,0 +1,49 @@
+CetDevelopmentKit/mainwindow/mainwindow.cpp
+  s_8cc836efc26cfb::t_380818ceb9eb97 20-29,122
+  s_ce916fac96efce::t_b146a1286341e8 4,12-13
+  s_8cc836efc26cfb::t_308f99b1f8d41a 119-121
+  s_8cc836efc26cfb::t_6ee323f5065371 123-124
+  s_c0cfe6d89889e0::t_b1f88871d3d05b 105-118,135-140
+CetDevelopmentKit/mainwindow/mainwindow.h
+  s_4a2c45290bbd9a::t_15208cfe6e92f4 42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "20273a78f3a8fa049e03364c3bba5e1c44b1ec6c",
+  "prompts": {},
+  "sessions": {
+    "s_4a2c45290bbd9a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a33f08f9a8dd541c8",
+        "model": "unknown"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    },
+    "s_8cc836efc26cfb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "21097ebd-f0a6-4b05-aa1b-5f3cb8036e7d",
+        "model": "deepseek-v4-flash"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    },
+    "s_c0cfe6d89889e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a7804e612caa1846f",
+        "model": "unknown"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    },
+    "s_ce916fac96efce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7368a389-c476-4765-aca6-95f39d4e638a",
+        "model": "glm-5.2"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    }
+  }
+}
