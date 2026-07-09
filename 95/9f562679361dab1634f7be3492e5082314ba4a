@@ -1,0 +1,19 @@
+CetDevelopmentKit/CetDevelopmentKit.pro
+  s_8cc836efc26cfb::t_e855bad2abf59f 27-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "959f562679361dab1634f7be3492e5082314ba4a",
+  "prompts": {},
+  "sessions": {
+    "s_8cc836efc26cfb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "21097ebd-f0a6-4b05-aa1b-5f3cb8036e7d",
+        "model": "deepseek-v4-flash"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    }
+  }
+}
