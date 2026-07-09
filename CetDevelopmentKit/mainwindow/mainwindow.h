@@ -39,7 +39,7 @@ private slots:
     void on_processConfigureButton_clicked();
 
 private:
-    QObject *loadPlugin(const QString &dllname);
+    QObject *loadPlugin(const QString &dllName, QString *errInfo = nullptr);
     void initFeaturesPlugin();
 
 private:
