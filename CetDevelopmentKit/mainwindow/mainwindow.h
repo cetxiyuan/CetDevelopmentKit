@@ -5,10 +5,7 @@
 #include <QProcess>
 #include <QSettings>
 
-#include "cetlogmanagerinterface.h"
-#include "cetlicenseinterface.h"
-#include "cetupdateinterface.h"
-#include "cetprogressinterface.h"
+#include "cettoolplugincontext.h"
 
 #include "ec200uconfigure.h"
 #include "adbconfigure.h"
@@ -39,19 +36,11 @@ private slots:
     void on_processConfigureButton_clicked();
 
 private:
-    QObject *loadPlugin(const QString &dllName, QString *errInfo = nullptr);
-    void initFeaturesPlugin();
-
-private:
     Ui::MainWindow *ui;
-    CetLogManagerInterface *m_cetLogManagerInterface;
+    CetToolPluginContext *const m_toolPluginCtx;
     QSettings *const m_settings;
     QProcess *const m_cmdProcess;
     EC200UConfigure *m_ec200uConfigure;
     ADBConfigure *m_adbConfigure;
-    
-    CetLicenseInterface *m_cetLicenseInterface;
-    CetUpdateInterface *m_cetUpdateInterface;
-    CetProgressInterface *m_cetProgressInterface;
 };
 #endif // MAINWINDOW_H
