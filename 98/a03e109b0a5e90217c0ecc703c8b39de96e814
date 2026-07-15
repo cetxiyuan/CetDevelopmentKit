@@ -1,0 +1,26 @@
+CetDevelopmentKit/mainwindow/mainwindow.cpp
+  s_b6d28002f7cca6::t_dc0c9d8874346c 4
+  s_b6d28002f7cca6::t_2935d104274721 23,53-54
+CetDevelopmentKit/CetDevelopmentKit.pro
+  s_b6d28002f7cca6::t_f25e9267fd3fbc 28
+CetDevelopmentKit/mainwindow/cettoolplugincontext.h
+  s_b6d28002f7cca6::t_69aeeb2316c530 1-64
+CetDevelopmentKit/mainwindow/mainwindow.h
+  s_b6d28002f7cca6::t_24dcb68ae123fb 8,40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "98a03e109b0a5e90217c0ecc703c8b39de96e814",
+  "prompts": {},
+  "sessions": {
+    "s_b6d28002f7cca6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "30163b75-cc15-420b-bde3-6afc476fe3a5",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    }
+  }
+}
