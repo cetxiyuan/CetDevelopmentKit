@@ -5,7 +5,7 @@
 | 项目 | 说明 |
 |---|---|
 | 软件名称 | CetDevelopmentKit（Cet 开发集成工具包） |
-| 当前版本 | V2.4.0 |
+| 当前版本 | V2.5.0 |
 | 技术栈 | Qt 5.15.2 / C++11 / MinGW 32-bit / Windows |
 | 作者 | CetXiyuan（笔名） |
 | 官网 | https://www.cetxiyuan.com/ |
@@ -16,7 +16,7 @@
 
 ## 二、整体架构
 
-CetDevelopmentKit 采用 **插件化架构**，核心应用（主程序）通过纯虚接口加载外部插件 DLL，功能模块则以内联 QWidget 子类的形式静态编译到主程序中。
+CetDevelopmentKit 采用 **插件化架构**，核心应用通过 `CetToolPluginContext` 统一加载和管理外部插件 DLL，功能模块则以内联 QWidget 子类的形式静态编译到主程序中。
 
 ### 架构图
 
@@ -34,9 +34,14 @@ CetDevelopmentKit 采用 **插件化架构**，核心应用（主程序）通过
 │  │   stdout/stderr → QPlainTextEdit（日志输出区）       │  │
 │  └────────────────────────────────────────────────────┘  │
 │                                                          │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │      CetToolPluginContext（插件上下文管理器）         │  │
+│  │  插件加载 / 完整性校验 / 激活时序 / 更新检测          │  │
+│  └────────────────────────────────────────────────────┘  │
+│                                                          │
 │  菜单栏：[许可] [日志管理]                              │
 └─────────────────────────────────────────────────────────┘
-         │ QPluginLoader 动态加载
+         │ CetToolPluginContext 统一管理
          ▼
 ┌─────────────────────────────────────────────────────────┐
 │                      插件层（plugins/）                   │
@@ -57,6 +62,7 @@ graph TD
     MainWindow["MainWindow<br/>(主窗口)"]
     EC200U["EC200UConfigure<br/>(差分包制作)"]
     ADB["ADBConfigure<br/>(ADB数据打包)"]
+    PluginCtx["CetToolPluginContext<br/>(插件上下文)"]
     License["CetLicensePlugin<br/>(授权插件)"]
     Update["CetUpdatePlugin<br/>(更新插件)"]
     LogMgr["CetLogManagerPlugin<br/>(日志管理插件)"]
@@ -67,13 +73,14 @@ graph TD
 
     MainWindow --> EC200U
     MainWindow --> ADB
-    MainWindow --> License
-    MainWindow --> Update
-    MainWindow --> LogMgr
-    MainWindow --> Progress
-    MainWindow --> Wizard
+    MainWindow --> PluginCtx
     MainWindow --> QProcess
     MainWindow --> QSettings
+    PluginCtx --> License
+    PluginCtx --> Update
+    PluginCtx --> LogMgr
+    PluginCtx --> Progress
+    PluginCtx --> Wizard
     EC200U --> QProcess
     EC200U --> QSettings
     ADB --> QProcess
@@ -83,10 +90,11 @@ graph TD
 ### 关键设计原则
 
 1. **单进程复用**：全局唯一 `QProcess` 实例由 `MainWindow` 持有，各功能模块共享，切换功能时 `close()` 当前进程再复用。
-2. **接口隔离插件**：所有插件通过纯虚接口类（`interfaces/` 目录）与主程序解耦，主程序仅依赖接口头文件，不依赖插件实现。
+2. **插件上下文封装**：所有插件通过 `CetToolPluginContext` 统一加载和管理，主窗口不再直接持有各插件接口指针，降低耦合度。
 3. **配置即时持久化**：用户输入字段变更时立即写入 `QSettings` INI 文件，无需手动保存（个别仅用于当次任务且每次必变的字段如输出文件名除外）。
 4. **HiDPI 自适应**：`main.cpp` 启动时启用 `AA_EnableHighDpiScaling` + `PassThrough` 舍入策略，确保高分辨率屏幕正确缩放。
 5. **跨平台风格一致**：通过 `QStyleFactory::create(list.last())` 选取系统最终可用风格（通常为 Fusion），保证 UI 外观统一。
+6. **插件完整性校验**：`CetToolPluginContext` 构造时通过 `selfIntegrityCheck()` 对 `CetProductWizard.dll` 做 SHA256 哈希校验，防止 DLL 被替换。
 
 ---
 
@@ -108,6 +116,7 @@ CetDevelopmentKit/                  ← 仓库根目录
 │   │   └── interfaces.pri
 │   ├── mainwindow/                 ← 主窗口模块
 │   │   ├── mainwindow.h / .cpp
+│   │   ├── cettoolplugincontext.h  ← 插件上下文管理器（源码在 CetToolDLLs）
 │   │   ├── mainwindow.ui
 │   │   └── mainwindow.pri
 │   ├── modules/                    ← 功能模块（每个子目录为一个工具模块）
@@ -125,6 +134,7 @@ CetDevelopmentKit/                  ← 仓库根目录
 │   └── build/                      ← 构建输出目录（不入版本库）
 ├── CetDevelopmentKit-Release/      ← 发布运行目录
 │   ├── CetDevelopmentKit.exe
+│   ├── CetCommandLineTool.exe      ← 命令行工具（V2.0.0 起随附）
 │   ├── CetProductWizard.dll
 │   ├── plugins/                    ← 运行时插件目录
 │   │   ├── CetLicensePlugin.dll
@@ -157,7 +167,7 @@ CetDevelopmentKit/                  ← 仓库根目录
 | 日志输出 | `QPlainTextEdit` 展示 stdout/stderr |
 | 进度显示 | `QProgressBar`，由各模块 `emit progress(value)` 信号驱动 |
 | 配置持久化 | `Configs/AppMaster.ini`，记录当前选中的功能索引 |
-| 插件加载 | `loadPlugin()` + `initFeaturesPlugin()` |
+| 插件初始化 | 委托给 `CetToolPluginContext::initFeatures()` |
 
 **功能切换逻辑**：
 
@@ -180,7 +190,31 @@ ComboBox 选择 → doCurrentIndexChanged()
     → finished → 设置进度条 100%，关闭进程
 ```
 
-### 4.2 EC200U 差分包制作模块
+### 4.2 CetToolPluginContext（插件上下文管理器）
+
+**文件**：`mainwindow/cettoolplugincontext.h`（声明），实现位于 `CetToolDLLs/CetToolDLLs/`
+
+`CetToolPluginContext` 是 V2.5.0 引入的插件管理中枢，将原先分散在 `MainWindow` 中的插件加载、激活时序、更新检测等逻辑集中封装。
+
+**职责**：
+
+| 职责 | 说明 |
+|---|---|
+| 插件加载 | 统一从指定路径加载 `.dll` 插件，支持完整性校验 |
+| 完整性校验 | 构造时对 `CetProductWizard.dll` 做 SHA256 哈希校验 |
+| 功能初始化 | `initFeatures()` 一次性完成所有插件的加载和激活时序设置 |
+| 接口访问 | 通过 `logManager()`、`license()`、`updater()`、`progress()` 访问器获取插件接口 |
+
+**接口访问器**：
+
+| 方法 | 返回值 | 说明 |
+|------|--------|------|
+| `logManager()` | `CetLogManagerInterface*` | 日志管理插件接口 |
+| `license()` | `CetLicenseInterface*` | 许可证插件接口 |
+| `updater()` | `CetUpdateInterface*` | 更新检测插件接口 |
+| `progress()` | `CetProgressInterface*` | 进度显示插件接口 |
+
+### 4.3 EC200U 差分包制作模块
 
 **文件**：`modules/ec200u/ec200uconfigure.h` / `ec200uconfigure.cpp`
 **配置文件**：`Configs/EC200UConfigure.ini`（键组：`EC200UConfig`）
@@ -205,7 +239,7 @@ ComboBox 选择 → doCurrentIndexChanged()
 
 **进度处理**：`recvHandle()` 收到任何输出即直接上报 100%（工具本身无结构化进度输出）。
 
-### 4.3 ADB 设备数据打包导出模块
+### 4.4 ADB 设备数据打包导出模块
 
 **文件**：`modules/adb/adbconfigure.h` / `adbconfigure.cpp`
 **配置文件**：`Configs/ADBConfigure.ini`（键组：`ADBConfig`）
@@ -241,20 +275,20 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 >
 > **安全注意**：ADB 密码以明文形式存储在 `Configs/ADBConfigure.ini` 中，请确保运行环境访问可控。
 
-### 4.4 插件接口层（interfaces/）
+### 4.5 插件接口层（interfaces/）
 
 | 接口类 | 接口 DLL | 职责 |
 |------|----------|------|
-| `CetLicenseInterface` | `CetLicensePlugin.dll` | 产品授权激活（绑定产品固钥） |
-| `CetUpdateInterface` | `CetUpdatePlugin.dll` | 在线更新检测 |
+| `CetLicenseInterface` | `CetLicensePlugin.dll` | 产品授权激活（绑定产品固钥，支持 Ed25519 签名验证） |
+| `CetUpdateInterface` | `CetUpdatePlugin.dll` | 在线更新检测（支持 2 位数版本号） |
 | `CetLogManagerInterface` | `CetLogManagerPlugin.dll` | 日志管理窗口 |
 | `CetProgressInterface` | `CetProgressPlugin.dll` | 进度显示插件 |
 
-### 4.5 链接库（libs/）
+### 4.6 链接库（libs/）
 
 | 文件 | 职责 |
 |------|------|
-| `CetProductWizard.dll` | 产品向导功能库，编译时隐式链接（`-lCetProductWizard`） |
+| `CetProductWizard.dll` | 产品向导功能库，编译时隐式链接（`-lCetProductWizard`），运行时 SHA256 校验 |
 
 ---
 
@@ -262,7 +296,7 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 
 ### 5.1 插件加载机制
 
-`MainWindow::loadPlugin()` 的搜索优先级：
+插件加载由 `CetToolPluginContext` 统一管理，搜索优先级：
 
 ```
 1. D:/Program Files (x86)/CetXiyuan/CetToolDLLs/plugins/   ← 开发/共享环境
@@ -280,18 +314,33 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 | `CetLogManagerInterface` | `org.qter.plugin.CetLogManagerInterface` | `CetLogManagerPlugin.dll` | 构造时加载，不显示警告 |
 | `CetProgressInterface` | `org.qter.plugin.CetProgressInterface` | `CetProgressPlugin.dll` | 静默忽略 |
 
-### 5.3 授权激活系统
+### 5.3 插件完整性校验
 
-激活以 `PRODUCT_NAME`（= `APP_NAME` + 主版本号 + 次版本号 + `"0"`，如 `CetDevelopmentKit240`）作为产品唯一标识，绑定设备固钥（`solidKey()`）。
+`CetToolPluginContext` 构造时执行自完整性检查：
+
+- 对 `CetProductWizard.dll` 做 SHA256 哈希计算
+- 与编译时嵌入的 `HASH_CetProductWizard_DLL`（定义在 `cettooldlls_hashes.h`）比对
+- 校验失败则记录错误，防止 DLL 被替换或篡改
+
+### 5.4 授权激活系统
+
+激活以 `PRODUCT_NAME`（= `APP_NAME` + 主版本号 + 次版本号 + `"0"`，如 `CetDevelopmentKit250`）作为产品唯一标识，绑定设备固钥（`solidKey()`）。
+
+**V2.5.0 许可 3.0 新特性**：
+- **Ed25519 签名验证**：许可文件采用 Ed25519 算法签名，公钥内嵌于 `CetLicensePlugin.dll`
+- **SHA256 校验**：插件自身支持 SHA256 完整性校验
+- **临时授权**：支持临时授权模式
+- **停用/拒绝状态**：授权被停用或拒绝后自动停止重试
 
 **自动激活时序**：
 
 ```
 程序启动
-    └─ 30秒后 → 首次自动激活
+    └─ 10秒后 → 首次自动激活
          ├─ 激活成功：主界面启用，标题栏恢复正常
          ├─ 激活失败：主界面禁用，标题栏显示到期信息和固钥
          └─ 30分钟后 → 再次激活（间隔时间每次翻倍：30→60→120→...分钟）
+              └─ 若授权被拒绝 → 停止重试
 
 用户手动激活：菜单栏 → [许可] → [激活]（弹出激活窗口）
 ```
@@ -304,17 +353,17 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 
 | 宏 | 正式版（IS_RELEASE_VERSION=1） | 补丁版（IS_RELEASE_VERSION=0） |
 |---|---|---|
-| `APP_VERSION` | `2.4.0` | `2.4.0.5251` |
-| `TIP_VERSION` | `(CXYQK5152.CDPK240.G631)` | `(CXYQK5152.CDPK240.G631) Patch-5251` |
-| `PRODUCT_NAME` | `CetDevelopmentKit240` | `CetDevelopmentKit240` |
+| `APP_VERSION` | `2.5.0` | `2.5.0.7152` |
+| `TIP_VERSION` | `(CXYQK5152.CDPK250.G716)` | `(CXYQK5152.CDPK250.G716) Patch-7152` |
+| `PRODUCT_NAME` | `CetDevelopmentKit250` | `CetDevelopmentKit250` |
 
-**版本编码说明**（以 `CXYQK5152.CDPK240.G631` 为例）：
+**版本编码说明**（以 `CXYQK5152.CDPK250.G716` 为例）：
 
 | 段 | 含义 |
 |---|---|
 | `CXYQK5152` | CetXiyuan Qt Kernel 5.15.2（Qt 版本） |
-| `CDPK240` | CetDevelopmentKit 第 240 次构建 |
-| `G631` | G=2026年（A=2020年起），6=6月，31编码为 31−6(月)=25 即 25日 |
+| `CDPK250` | CetDevelopmentKit 第 250 次构建 |
+| `G716` | G=2026年（A=2020年起），7=7月，16编码为 16−7(月)=9 即 9日 |
 
 ---
 
@@ -322,16 +371,14 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 
 ### 7.1 MainWindow（主窗口）
 
-**职责**：应用程序核心控制器，管理所有子模块、插件和进程生命周期。
+**职责**：应用程序核心控制器，管理所有子模块、进程生命周期，委托 `CetToolPluginContext` 处理插件管理。
 
 **重要方法**：
 
 | 方法 | 说明 |
 |------|------|
-| `MainWindow(QWidget *parent)` | 构造函数，初始化插件、子模块、信号/槽连接、定时激活 |
+| `MainWindow(QWidget *parent)` | 构造函数，初始化 CetToolPluginContext、QSettings、UI、子模块、信号/槽连接 |
 | `~MainWindow()` | 析构函数，清理 QProcess 和 UI |
-| `loadPlugin(const QString &dllName)` | 从插件目录加载指定 DLL 插件，返回 QObject 指针 |
-| `initFeaturesPlugin()` | 初始化所有功能插件 + 许可证激活时序调度 |
 | `doCurrentIndexChanged(int index)` | 切换功能模块（EC200U / ADB），保存选择状态到 QSettings |
 
 **重要信号/槽**：
@@ -348,14 +395,29 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
+| `m_toolPluginCtx` | `CetToolPluginContext* const` | 插件上下文管理器（统一管理所有插件） |
 | `m_cmdProcess` | `QProcess* const` | 共享进程实例，所有模块共用 |
 | `m_settings` | `QSettings* const` | 应用全局配置（`Configs/AppMaster.ini`） |
 | `m_ec200uConfigure` | `EC200UConfigure*` | EC200U 功能模块实例 |
 | `m_adbConfigure` | `ADBConfigure*` | ADB 功能模块实例 |
-| `m_cetLicenseInterface` | `CetLicenseInterface*` | 许可证插件接口 |
-| `m_cetUpdateInterface` | `CetUpdateInterface*` | 更新检测插件接口 |
 
-### 7.2 EC200UConfigure（EC200U 差分包制作）
+### 7.2 CetToolPluginContext（插件上下文管理器）
+
+**职责**：统一管理所有插件的加载、完整性校验、激活时序和更新检测。
+
+**重要方法**：
+
+| 方法 | 说明 |
+|------|------|
+| `CetToolPluginContext(const QString &selfHash, QWidget *parent)` | 构造函数，执行自完整性校验 |
+| `initFeatures(logManagerMenu, licenseMenu, productName, versionTitle, appName, appVersion, onActivated)` | 初始化所有功能插件并设置激活时序 |
+| `loadPlugin(const QString &dllName, QString *errInfo)` | 带完整性校验的插件加载，返回 QObject 指针 |
+| `logManager()` | 获取日志管理插件接口 |
+| `license()` | 获取许可证插件接口 |
+| `updater()` | 获取更新检测插件接口 |
+| `progress()` | 获取进度显示插件接口 |
+
+### 7.3 EC200UConfigure（EC200U 差分包制作）
 
 **职责**：配置 EC200U 模块的 OTA 差分升级包制作参数，构造并验证命令行。
 
@@ -381,7 +443,7 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 | `on_newPacketButton_clicked()` | 浏览新固件包 |
 | `on_outputDirButton_clicked()` | 浏览输出目录 |
 
-### 7.3 ADBConfigure（ADB 设备数据打包导出）
+### 7.4 ADBConfigure（ADB 设备数据打包导出）
 
 **职责**：通过 ADB Shell 交互式会话，实现设备数据打包并拉取到本地。
 
@@ -404,7 +466,7 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 |------|------|------|
 | `m_step` | `int` | 状态机步骤号（0-2），-1 表示流程结束 |
 
-### 7.4 CetLicenseInterface（许可证接口）
+### 7.5 CetLicenseInterface（许可证接口）
 
 **职责**：定义产品授权激活的抽象契约。
 
@@ -426,7 +488,7 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 | `resultString()` | 获取激活结果描述 |
 | `solidKey()` | 获取产品固钥 |
 
-### 7.5 CetUpdateInterface（更新检测接口）
+### 7.6 CetUpdateInterface（更新检测接口）
 
 **纯虚方法**：
 
@@ -495,23 +557,32 @@ adb pull 完成 → onProcessFinished()
     └─ ui->progressBar->setValue(100)
 ```
 
-### 场景三：许可证激活时序
+### 场景三：插件加载与许可证激活时序
 
 ```
 应用启动
     │
     ▼
-initFeaturesPlugin()
-    ├─ 加载 CetLicensePlugin.dll
-    ├─ m_cetLicenseInterface->initialize(PRODUCT_NAME)
-    ├─ 注册 QTimer::singleShot(30秒, 首次激活)
+MainWindow 构造函数
+    ├─ 创建 CetToolPluginContext(HASH_CetProductWizard_DLL)
+    │   └─ selfIntegrityCheck()：SHA256 校验 CetProductWizard.dll
+    ├─ 创建 QSettings、QProcess
+    ├─ 初始化 UI、子模块
     │
     ▼
-30秒后 → 自动触发激活
-    ├─ activate() 后台激活
-    ├─ 成功 → 启用 centralWidget，更新标题
-    ├─ 失败/取消 → 禁用 centralWidget，显示到期信息
-    └─ 设置下一次定时器: 30分 → 60分 → 120分 → ... (指数退避)
+m_toolPluginCtx->initFeatures()
+    ├─ 加载 CetLogManagerPlugin.dll
+    ├─ 加载 CetLicensePlugin.dll → initialize(PRODUCT_NAME)
+    ├─ 加载 CetUpdatePlugin.dll → checkUpdate()
+    ├─ 加载 CetProgressPlugin.dll
+    │
+    ▼
+激活时序（由 CetToolPluginContext 内部管理）
+    ├─ 首次激活：10 秒后
+    │   ├─ 成功 → 启用 centralWidget，更新标题
+    │   ├─ 失败/取消 → 禁用 centralWidget，显示到期信息
+    │   └─ 被拒绝 → 停止后续重试
+    └─ 重试：30 分钟 → 60 分钟 → 120 分钟 → ... (指数退避)
 ```
 
 ---
@@ -525,6 +596,7 @@ initFeaturesPlugin()
 | Qt | 5.15.2 | 核心框架 |
 | MinGW | 32-bit | 编译器 |
 | CetProductWizard | (链接库) | 产品向导功能 |
+| CetToolDLLs | (源码库) | CetToolPluginContext 实现及插件工程 |
 | Inno Setup | 6.x | 安装包制作 |
 | fotacreate2 | EC200U 工具链 | 差分包生成 |
 | adb | Android SDK | 设备通信 |
@@ -543,16 +615,16 @@ initFeaturesPlugin()
 ```
 main.cpp
   └── MainWindow
-        ├── interfaces/ (插件接口，运行时动态加载)
-        │     ├── CetLicenseInterface
-        │     ├── CetUpdateInterface
-        │     ├── CetLogManagerInterface
-        │     └── CetProgressInterface
+        ├── CetToolPluginContext (插件上下文管理器)
+        │     ├── CetLicenseInterface → CetLicensePlugin.dll
+        │     ├── CetUpdateInterface → CetUpdatePlugin.dll
+        │     ├── CetLogManagerInterface → CetLogManagerPlugin.dll
+        │     └── CetProgressInterface → CetProgressPlugin.dll
         ├── modules/ec200u/ (静态编译)
         │     └── EC200UConfigure
         ├── modules/adb/ (静态编译)
         │     └── ADBConfigure
-        └── libs/CetProductWizard.dll (隐式链接)
+        └── libs/CetProductWizard.dll (隐式链接 + 运行时 SHA256 校验)
 ```
 
 ---
@@ -593,12 +665,13 @@ main.cpp
 
 ### 3. 指数退避激活策略
 
-**决策**：激活失败后采用指数退避重试（30 分钟 → 60 分钟 → 120 分钟 → ...）。
+**决策**：激活失败后采用指数退避重试（30 分钟 → 60 分钟 → 120 分钟 → ...），被拒绝则完全停止。
 
 **理由**：
 - 避免短时间频繁请求对服务器造成压力
-- 首次激活 30 秒延迟，给系统启动留出缓冲时间
+- 首次激活 10 秒延迟，给系统启动留出缓冲时间
 - 指数增长确保长期未激活时不会过于频繁地重试
+- 拒绝状态停止重试，避免无效请求
 
 ### 4. QMake 优先，CMake 兼容
 
@@ -620,6 +693,16 @@ main.cpp
 
 **代价**：如果 ADB 输出格式变化（如中文提示），匹配逻辑需要同步更新。
 
+### 6. 插件上下文封装（V2.5.0）
+
+**决策**：将插件加载和管理逻辑从 `MainWindow` 迁移到独立的 `CetToolPluginContext` 类。
+
+**理由**：
+- 降低 MainWindow 的复杂度，单一职责原则
+- 插件管理逻辑可在多个工具间复用（CetToolDLLs 共享）
+- 便于独立维护和测试插件管理功能
+- 支持完整性校验，防止 DLL 被替换
+
 ---
 
 ## 十二、扩展点
@@ -627,8 +710,9 @@ main.cpp
 | 扩展点 | 说明 | 修改方式 |
 |--------|------|---------|
 | 新增功能模块 | 在 `modules/` 下新增子目录，实现 QWidget 子类 | 添加 `.pri` 文件，在 `modules.pri` 中 include，在 `MainWindow` 中注册 |
-| 新增插件类型 | 在 `interfaces/` 下新增纯虚接口 | 定义接口类，添加 `Q_DECLARE_INTERFACE` 宏，在 `initFeaturesPlugin()` 中加载 |
+| 新增插件类型 | 在 `interfaces/` 下新增纯虚接口 | 定义接口类，添加 `Q_DECLARE_INTERFACE` 宏，在 `CetToolPluginContext` 中加载 |
 | 新增配置项 | 在各模块的 INI 配置文件组中增加键值 | 使用 `QSettings` 的 `beginGroup/endGroup` 模式 |
 | 扩展 ADB 状态机 | 增加新的 Shell 交互步骤 | 在 `ADBConfigure::recvHandle()` 的 switch 中添加新 case |
 | 支持更多构建套件 | 当前仅支持 MinGW 32-bit | 修改 `.pro` 文件的条件编译宏，添加对应套件的库路径 |
 | 国际化 | 当前使用 `tr()` 但仅支持中文 | 添加 `.ts` 翻译文件，使用 Qt Linguist 工具链 |
+| 插件完整性 | 当前仅校验 CetProductWizard.dll | 扩展 `selfIntegrityCheck()` 支持校验其他 DLL |

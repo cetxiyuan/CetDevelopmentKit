@@ -2,26 +2,26 @@
 
 ## 一、版本信息
 
-**当前版本**: V2.4.0
+**当前版本**: V2.5.0
 
 ### 版本号
 
 | 宏 | 值 | 说明 |
 |----|-----|------|
 | `VER_MAJOR` | 2 | 主版本号 |
-| `VER_MINOR` | 4 | 次版本号 |
+| `VER_MINOR` | 5 | 次版本号 |
 | `VER_MICRO` | 0 | 小版本号 |
-| `IS_RELEASE_VERSION` | 1 | 是否为正式版（1=正式版，0=补丁版） |
-| `APP_VERSION` | `"2.4.0"` | 应用版本字符串 |
-| `TIP_VERSION` | `"(CXYQK5152.CDPK240.G631)"` | 版本提示字符串 |
-| `PATCH_PACKET` | `"5251"` | 补丁包号 |
+| `IS_RELEASE_VERSION` | 0 | 是否为正式版（1=正式版，0=补丁版） |
+| `APP_VERSION` | `"2.5.0.7152"` | 应用版本字符串（补丁版） |
+| `TIP_VERSION` | `"(CXYQK5152.CDPK250.G716) Patch-7152"` | 版本提示字符串（补丁版） |
+| `PATCH_PACKET` | `"7152"` | 补丁包号 |
 
 ### 产品信息
 
 | 宏 | 值 | 说明 |
 |----|-----|------|
 | `APP_NAME` | `"CetDevelopmentKit"` | 应用名称 |
-| `PRODUCT_NAME` | `"CetDevelopmentKit240"` | 产品 ID（= APP_NAME + 主版本号 + 次版本号 + "0"） |
+| `PRODUCT_NAME` | `"CetDevelopmentKit250"` | 产品 ID（= APP_NAME + 主版本号 + 次版本号 + "0"） |
 | `COMPANY_NAME` | `"CetXiyuan"` | 公司名称 |
 | `PRODUCT_ICON` | `"favorite.ico"` | 应用图标文件 |
 | `ORGANIZATION_DOMAIN` | `"https://www.cetxiyuan.com/"` | 公司域名 |
@@ -38,7 +38,7 @@
 
 | 宏 | 说明 |
 |----|------|
-| `FILE_VERSION` | Windows 文件版本（`2,4,0`） |
+| `FILE_VERSION` | Windows 文件版本（`2,5,0`） |
 | `FILE_VERSION_STR` | 文件版本字符串 |
 | `FILE_DESCRIPTION` | 文件描述（"CetDevelopmentKit based on Qt 5.15.2 (MinGW, 32 bit)"） |
 | `LEGAL_COPYRIGHT` | 版权信息 |
@@ -46,13 +46,13 @@
 
 ### 版本编码说明
 
-以 `RELEASE_DATE` 宏 `(CXYQK5152.CDPK240.G631)` 为例：
+以 `RELEASE_DATE` 宏 `(CXYQK5152.CDPK250.G716)` 为例：
 
 | 段 | 含义 |
 |---|---|
 | `CXYQK5152` | CetXiyuan Qt Kernel 5.15.2（Qt 版本） |
-| `CDPK240` | CetDevelopmentKit 第 240 次构建 |
-| `G631` | G=2026年（A=2020年起），6=6月，31编码为 31−6=25 即 25日 |
+| `CDPK250` | CetDevelopmentKit 第 250 次构建 |
+| `G716` | G=2026年（A=2020年起），7=7月，16编码为 16−7=9 即 9日 |
 
 ---
 
@@ -62,7 +62,7 @@
 
 **头文件**: `mainwindow/mainwindow.h`
 
-**用途**: 应用程序主窗口，负责插件加载、功能模块管理、进程生命周期控制和许可证激活调度。
+**用途**: 应用程序主窗口，负责功能模块管理、进程生命周期控制，插件管理委托给 `CetToolPluginContext`。
 
 **继承关系**: `QMainWindow`
 
@@ -83,13 +83,13 @@ MainWindow(QWidget *parent = nullptr);
 ```
 
 初始化顺序：
-1. 加载 `CetLogManagerPlugin.dll` 插件
-2. 创建 `QSettings("Configs/AppMaster.ini", QSettings::IniFormat)`
-3. 创建 `QProcess`
-4. 设置 UTF-8 编码
-5. 初始化 UI，创建 `EC200UConfigure` 和 `ADBConfigure` 子模块
-6. 连接所有信号/槽
-7. 调用 `initFeaturesPlugin()` 加载其余插件并启动激活时序
+1. 创建 UI、`CetToolPluginContext`（含自完整性校验）、`QSettings`、`QProcess`（初始化列表）
+2. 设置 UTF-8 编码（`QTextCodec::setCodecForLocale`）
+3. 调用 `ui->setupUi(this)` 初始化界面
+4. 创建 `EC200UConfigure` 和 `ADBConfigure` 子模块，配置 `configureGroupBox`
+5. 向 `processComboBox` 添加功能条目，从 `QSettings` 恢复上次选中的模块
+6. 调用 `m_toolPluginCtx->initFeatures()` 初始化所有插件并启动激活时序
+7. 连接所有信号/槽（`QProcess` 输出、子模块 `progress`、`processComboBox` 切换等）
 
 #### 析构函数
 
@@ -100,33 +100,6 @@ MainWindow(QWidget *parent = nullptr);
 清理 `m_cmdProcess` 和 UI 资源。
 
 #### 私有方法
-
-```cpp
-QObject *loadPlugin(const QString &dllName);
-```
-
-从插件目录加载指定 DLL 插件。
-
-**参数**:
-- `dllName` — 插件 DLL 文件名（如 `"CetLicensePlugin.dll"`）
-
-**返回值**: 插件实例的 `QObject*` 指针，加载失败返回 `nullptr`。
-
-**加载路径优先级**:
-1. `D:/Program Files (x86)/CetXiyuan/CetToolDLLs/plugins/`
-2. `./plugins/`（相对于可执行文件目录）
-
-#### 私有方法
-
-```cpp
-void initFeaturesPlugin();
-```
-
-初始化所有功能插件，包括：
-- 配置日志管理菜单项
-- 加载许可证插件并设置激活时序（30 秒首次 + 指数退避）
-- 加载更新检测插件并检查更新
-- 加载进度显示插件
 
 ```cpp
 void doCurrentIndexChanged(int index);
@@ -167,39 +140,96 @@ connect(m_cmdProcess, &QProcess::readyReadStandardError, this, [=]() {
 });
 ```
 
-**激活定时器**（在 `initFeaturesPlugin()` 中设置）:
-
-```cpp
-// 首次激活：30 秒后
-QTimer::singleShot(30 * 1000, this, [=]() {
-    emit activeAction->triggered(true);
-});
-
-// 重试激活：指数退避
-QTimer::singleShot(auto_timing_msec, this, [=]() {
-    auto_timing_active = true;
-    auto_timing_msec = auto_timing_msec * 2;  // 30min → 60min → 120min ...
-    emit activeAction->triggered(true);
-});
-```
-
 #### 关键成员变量
 
 | 变量 | 类型 | 说明 |
 |------|------|------|
 | `ui` | `Ui::MainWindow*` | UI 自动生成类 |
-| `m_cetLogManagerInterface` | `CetLogManagerInterface*` | 日志管理插件 |
+| `m_toolPluginCtx` | `CetToolPluginContext* const` | 插件上下文管理器（统一管理所有插件） |
 | `m_settings` | `QSettings* const` | 全局配置（INI 文件） |
 | `m_cmdProcess` | `QProcess* const` | 共享进程实例 |
 | `m_ec200uConfigure` | `EC200UConfigure*` | EC200U 功能模块 |
 | `m_adbConfigure` | `ADBConfigure*` | ADB 功能模块 |
-| `m_cetLicenseInterface` | `CetLicenseInterface*` | 许可证插件 |
-| `m_cetUpdateInterface` | `CetUpdateInterface*` | 更新检测插件 |
-| `m_cetProgressInterface` | `CetProgressInterface*` | 进度显示插件 |
+
+> **V2.5.0 变更**：原先 MainWindow 中分散的插件接口指针（`m_cetLicenseInterface`、`m_cetUpdateInterface` 等）和 `loadPlugin()`、`initFeaturesPlugin()` 方法已迁移至 `CetToolPluginContext`。
 
 ---
 
-### 2.2 EC200UConfigure
+### 2.2 CetToolPluginContext
+
+**头文件**: `mainwindow/cettoolplugincontext.h`（声明），实现位于 `CetToolDLLs/CetToolDLLs/`
+
+**用途**: 插件上下文管理器，统一封装所有插件的加载、完整性校验、激活时序调度和更新检测。
+
+**继承关系**: `QWidget`
+
+#### 构造函数
+
+```cpp
+explicit CetToolPluginContext(const QString &selfHash, QWidget *parent = nullptr);
+```
+
+**参数**:
+- `selfHash` — `CetProductWizard.dll` 的 SHA256 期望哈希值（编译时嵌入，通过 `cettooldlls_hashes.h` 传入 `HASH_CetProductWizard_DLL`）
+- `parent` — 父控件
+
+构造时调用 `selfIntegrityCheck()` 对 `CetProductWizard.dll` 做 SHA256 校验。
+
+#### 公共方法
+
+```cpp
+void initFeatures(QMenu *logManagerMenu,
+                  QMenu *licenseMenu,
+                  const QString &productName,
+                  const QString &versionTitle,
+                  const QString &appName,
+                  const QString &appVersion,
+                  std::function<void(bool activated)> onActivated = nullptr);
+```
+
+初始化所有功能插件，包括：
+- 配置日志管理菜单项
+- 加载许可证插件并设置激活时序（10 秒首次 + 指数退避）
+- 加载更新检测插件并检查更新
+- 加载进度显示插件
+
+**参数**:
+- `logManagerMenu` — 日志管理菜单项
+- `licenseMenu` — 许可证菜单项
+- `productName` — 产品名称（用作激活 ID，如 `"CetDevelopmentKit250"`）
+- `versionTitle` — 版本标题（显示在标题栏）
+- `appName` — 应用名称（如 `"CetDevelopmentKit"`）
+- `appVersion` — 应用版本号（如 `"2.5.0"`）
+- `onActivated` — 激活状态回调
+
+```cpp
+QObject *loadPlugin(const QString &dllName, QString *errInfo = nullptr);
+```
+
+从插件目录加载指定 DLL 插件，支持完整性校验。
+
+**参数**:
+- `dllName` — 插件 DLL 文件名（如 `"CetLicensePlugin.dll"`）
+- `errInfo` — 可选输出参数，返回错误信息
+
+**返回值**: 插件实例的 `QObject*` 指针，加载失败返回 `nullptr`。
+
+**加载路径优先级**:
+1. `D:/Program Files (x86)/CetXiyuan/CetToolDLLs/plugins/`
+2. `./plugins/`（相对于可执行文件目录）
+
+#### 接口访问器
+
+| 方法 | 返回值 | 说明 |
+|------|--------|------|
+| `logManager()` | `CetLogManagerInterface*` | 日志管理插件接口 |
+| `license()` | `CetLicenseInterface*` | 许可证插件接口 |
+| `updater()` | `CetUpdateInterface*` | 更新检测插件接口 |
+| `progress()` | `CetProgressInterface*` | 进度显示插件接口 |
+
+---
+
+### 2.3 EC200UConfigure
 
 **头文件**: `modules/ec200u/ec200uconfigure.h`
 
@@ -276,7 +306,7 @@ void recvHandle(const QByteArray &data);
 
 ---
 
-### 2.3 ADBConfigure
+### 2.4 ADBConfigure
 
 **头文件**: `modules/adb/adbconfigure.h`
 
@@ -412,7 +442,7 @@ typedef void (*callback_t)(void);
 
 **参数**:
 - `appName` — 应用名称（如 `"CetDevelopmentKit"`）
-- `appVersion` — 当前版本号（如 `"2.4.0"`）
+- `appVersion` — 当前版本号（如 `"2.5.0"`）
 - `callback` — 可选回调函数，更新完成后调用（如 `QCoreApplication::quit`）
 - `newVersion` — 输出参数，新版本号
 
@@ -493,25 +523,15 @@ outputDir=<string>     ; 本地输出目录
 
 ---
 
-## 六、内部宏定义
+## 六、CetToolPluginContext 宏定义
 
-### mainwindow.cpp 中的加载宏
+### mainwindow.cpp 中的版本宏
 
 ```cpp
-#define INIT_INTERFACE(mInterface, name)    \
-    mInterface(qobject_cast<typeof(mInterface)>(loadPlugin(name)))
-
-#define LOAD_INTERFACE(mInterface, name, isRemind)    \
-    mInterface = qobject_cast<typeof(mInterface)>(loadPlugin(name));    \
-    if (!mInterface && isRemind)    \
-        QMessageBox::warning(this, tr("警告"), tr("缺少 (%1) 库\t").arg(name))
+#define CETDEVELOPMENTKIT_VERSION  "Cet开发集成工具包 V" APP_VERSION " " TIP_VERSION
 ```
 
-**用途**:
-- `INIT_INTERFACE` — 在构造函数初始化列表中使用，加载插件并赋值给成员变量
-- `LOAD_INTERFACE` — 在函数体内使用，加载插件并赋值，`isRemind=true` 时缺失会弹窗警告
-
-> **注意**：宏中的 `typeof` 是 GCC 扩展（非 ISO C++），MinGW 编译器支持。若移植到 MSVC 需替换为 `decltype`。
+用于标题栏显示。
 
 ### 模块配置前缀宏
 
@@ -522,3 +542,21 @@ outputDir=<string>     ; 本地输出目录
 ```
 
 **用途**: 统一管理各模块的 QSettings 键组名称。`CETDKIT_SETTINGS_PREFIX` 在 `mainwindow.cpp` 中定义，其余在各自模块的 `.cpp` 文件中定义。
+
+### CetToolPluginContext 导出宏
+
+```cpp
+#ifndef PRODUCTWIZARD_EXPORT
+    #ifndef QT_STATIC
+        #if defined(BUILD_PRODUCTWIZARD_LIB)
+        #define PRODUCTWIZARD_EXPORT Q_DECL_EXPORT
+        #else
+        #define PRODUCTWIZARD_EXPORT Q_DECL_IMPORT
+        #endif
+    #else
+        #define PRODUCTWIZARD_EXPORT
+    #endif
+#endif
+```
+
+与 `productwizard.h` 保持一致，避免重复定义。

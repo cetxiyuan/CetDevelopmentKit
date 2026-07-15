@@ -8,10 +8,10 @@
 |------|------|------|
 | 类名 | 大驼峰 (PascalCase) | `MainWindow`, `EC200UConfigure`, `ADBConfigure` |
 | 接口类 | `Cet` 前缀 + 大驼峰 | `CetLicenseInterface`, `CetUpdateInterface` |
-| 成员变量 | `m_` 前缀 + 小驼峰 | `m_cmdProcess`, `m_settings`, `m_ec200uConfigure` |
+| 成员变量 | `m_` 前缀 + 小驼峰 | `m_cmdProcess`, `m_settings`, `m_toolPluginCtx` |
 | 局部变量 | 小驼峰 | `toolPath`, `oldPacket`, `exitCode` |
 | 宏定义 | 全大写 + 下划线 | `VER_MAJOR`, `PRODUCT_NAME`, `CETDKIT_SETTINGS_PREFIX` |
-| 文件名 | 全小写 + 下划线分隔 | `mainwindow.cpp`, `ec200uconfigure.h` |
+| 文件名 | 全小写 + 下划线分隔 | `mainwindow.cpp`, `ec200uconfigure.h`, `cettoolplugincontext.h` |
 | UI 文件 | 与类名一致 | `mainwindow.ui`, `ec200uconfigure.ui` |
 | 信号/槽 | Qt 自动命名规则 | `on_processHandleButton_clicked()` |
 | 枚举值 | 全大写 + 下划线 | `CONFIG_EC200U_DPATH`, `ACTIVATE_OK` |
@@ -46,9 +46,6 @@ virtual void initialize(const QString &productId) = 0;
 
 // 工具包种类
 ui->processComboBox->addItem("EC200U 差分包制作", CONFIG_EC200U_DPATH);
-
-/* 第一次(30)分钟激活 第二次(30*2=60)分钟 依次类推 */
-QTimer::singleShot(auto_timing_msec, this, [=]() { ... });
 ```
 
 ### 头文件组织
@@ -97,18 +94,20 @@ class MyClass : public QWidget
 
 类型包括：
 - 发布正式版 Vx.y.z     (版本发布)
+- 发布补丁包 Vx.y.z.nnnn (补丁包发布)
 - Fixed: <描述>         (Bug 修复)
 - Updated: <描述>        (更新/改进)
 - Added: <描述>          (新增功能)
+- Modified: <描述>       (修改调整)
 ```
 
 示例：
 
 ```
-发布正式版 V2.4.0
-Fixed: 上电首次自动激活改成 30 秒
-Updated: 许可2.0对应的插件包
-Fixed: 修复升级功能容易失败(延长10秒/去掉HTTP请求超时设置)
+发布正式版 V2.5.0(采样许可3.0)
+Updated: 支持临时授权、停用/拒绝状态，拒绝后停止重试
+Fixed: 修复许可周期超过 24小时 从 10min 开始重置
+Modified: 许可证激活定时器重构为可复用 QTimer
 ```
 
 ### 版本号更新
@@ -182,11 +181,12 @@ private slots:
 
 | 场景 | 预期结果 |
 |------|---------|
-| 首次启动（无配置文件） | 正常启动，30 秒后触发激活 |
+| 首次启动（无配置文件） | 正常启动，10 秒后触发激活 |
 | 已激活状态启动 | 正常进入主界面，中央控件可用 |
 | 未激活状态启动 | 中央控件禁用，显示到期提示 |
 | 切换功能模块 | 配置面板切换，日志区清空 |
 | 配置文件持久化 | 关闭重开后配置恢复 |
+| DLL 完整性校验 | CetProductWizard.dll 哈希匹配，校验通过 |
 
 ---
 
@@ -206,13 +206,11 @@ qDebug() << "command" << command;
 
 | 位置 | 日志内容 | 用途 |
 |------|---------|------|
-| `mainwindow.cpp:185` | `on_processComboBox_currentIndexChanged type <type>` | 模块切换跟踪 |
-| `mainwindow.cpp:196` | `processIndex <index>` | 模块索引保存跟踪 |
-| `mainwindow.cpp:205` | `exitCode <code> exitStatus <status>` | 进程退出状态 |
-| `mainwindow.cpp:239` | `command <command>` | 执行的命令 |
-| `mainwindow.cpp:161` | `[license:activate] The next activation time(ms): <ms>` | 激活时序 |
-| `mainwindow.cpp:166` | `[license:activate] The first activation time(ms): 30000` | 首次激活时间 |
-| `adbconfigure.cpp:122` | `fileName <name>` | ADB 工具路径选择 |
+| `mainwindow.cpp` | `on_processComboBox_currentIndexChanged type <type>` | 模块切换跟踪 |
+| `mainwindow.cpp` | `processIndex <index>` | 模块索引保存跟踪 |
+| `mainwindow.cpp` | `exitCode <code> exitStatus <status>` | 进程退出状态 |
+| `mainwindow.cpp` | `command <command>` | 执行的命令 |
+| `adbconfigure.cpp` | `fileName <name>` | ADB 工具路径选择 |
 
 ### 调试流程
 
@@ -233,7 +231,7 @@ qDebug() << "command" << command;
 
 **场景 3: 验证插件加载**
 
-在 `loadPlugin()` 中设置断点，检查 `pluginsDir` 路径和 `plugin` 返回值。
+在 `CetToolPluginContext::loadPlugin()` 中设置断点，检查 `pluginsDir` 路径和 `plugin` 返回值。
 
 ### 插件调试技巧
 
@@ -279,9 +277,9 @@ if (!loader.instance()) {
 
 ```cpp
 #define VER_MAJOR               2
-#define VER_MINOR               4
+#define VER_MINOR               5
 #define VER_MICRO               0
-#define RELEASE_DATE            "(CXYQK5152.CDPK240.G631)"
+#define RELEASE_DATE            "(CXYQK5152.CDPK250.G716)"
 #define IS_RELEASE_VERSION      ( 1 )
 ```
 
@@ -290,18 +288,18 @@ if (!loader.instance()) {
 编辑 `CetDevelopmentKit-Setup/CetDevelopmentKit.iss`:
 
 ```iss
-#define MyAppVersion "2.4.0"
+#define MyAppVersion "2.5.0"
 ```
 
 ### 3. 更新 CHANGELOG.md
 
 ```markdown
-## [2.4.0] - 2026-06-25
+## [2.5.0] - 2026-07-09
 
-### 修改
+### 新增
 - xxx
 
-### 修复
+### 修改
 - xxx
 ```
 
@@ -332,8 +330,8 @@ mkdir plugins
 
 ```shell
 git add CetDevelopmentKit/version.h CetDevelopmentKit-Setup/CetDevelopmentKit.iss CHANGELOG.md
-git commit -m "发布正式版 V2.4.0"
-git tag -a v2.4.0 -m "Release V2.4.0"
+git commit -m "发布正式版 V2.5.0"
+git tag -a v2.5.0 -m "Release V2.5.0"
 git push origin master --tags
 ```
 
@@ -341,7 +339,7 @@ git push origin master --tags
 
 - 在干净的测试环境安装
 - 验证所有功能正常
-- 验证插件加载正常
+- 验证插件加载和完整性校验正常
 
 ---
 
@@ -428,7 +426,7 @@ enum ConfigType {
 
 ### 7.1 插件系统概述
 
-CetDevelopmentKit 使用 Qt 插件机制（`QPluginLoader`）在运行时动态加载功能插件。主程序仅依赖 `interfaces/` 目录中的纯虚接口类，插件实现与主程序完全解耦，无需重新编译主程序即可替换或升级插件。
+CetDevelopmentKit 使用 Qt 插件机制（`QPluginLoader`）在运行时动态加载功能插件。插件管理由 `CetToolPluginContext` 统一封装，其源码位于 `CetToolDLLs` 仓库（通过 `INCLUDEPATH += $$PWD/../../CetToolDLLs` 引入）。
 
 **插件加载路径（按优先级）：**
 
@@ -482,7 +480,7 @@ HEADERS += \
 
 #### 步骤 2：创建插件工程
 
-新建一个独立的 Qt 工程（建议与主工程同级目录），`.pro` 文件关键配置：
+在 `CetToolDLLs/CetToolPlugins/` 下新建插件子目录。`.pro` 文件关键配置：
 
 ```qmake
 QT       += core
@@ -490,11 +488,11 @@ TEMPLATE  = lib
 CONFIG   += plugin
 CONFIG   += c++11
 
-# 插件 DLL 名称（与主程序 loadPlugin 中传入的名称一致）
+# 插件 DLL 名称
 TARGET = CetMyPlugin
 
 # 引入主工程的接口头文件
-INCLUDEPATH += ../CetDevelopmentKit/interfaces
+INCLUDEPATH += ../../../CetDevelopmentKit/CetDevelopmentKit/interfaces
 ```
 
 #### 步骤 3：实现插件类
@@ -507,7 +505,6 @@ INCLUDEPATH += ../CetDevelopmentKit/interfaces
 class CetMyPlugin : public QObject, public CetMyPluginInterface
 {
     Q_OBJECT
-    // 必须同时声明 QObject 和接口的 IID
     Q_PLUGIN_METADATA(IID "org.qter.plugin.CetMyPluginInterface")
     Q_INTERFACES(CetMyPluginInterface)
 
@@ -534,26 +531,22 @@ void CetMyPlugin::doSomething()
 
 #### 步骤 4：在主程序中加载使用
 
-在 `mainwindow.h` 中添加成员：
+由于 V2.5.0 起插件通过 `CetToolPluginContext` 管理，有两种方式：
+
+**方式一（推荐）：扩展 CetToolPluginContext**
+
+在 `CetToolDLLs/CetToolDLLs/` 的 `CetToolPluginContext` 实现中添加新接口的加载逻辑。
+
+**方式二：在 MainWindow 中直接调用**
 
 ```cpp
-#include "cetmyplugininterface.h"
-
-// 在 private 成员区：
-CetMyPluginInterface *m_cetMyPluginInterface;
-```
-
-在 `mainwindow.cpp` 的 `initFeaturesPlugin()` 中加载：
-
-```cpp
-// 第二个参数 true 表示插件缺失时弹出警告
-LOAD_INTERFACE(m_cetMyPluginInterface, "CetMyPlugin.dll", true);
-if (m_cetMyPluginInterface) {
-    m_cetMyPluginInterface->doSomething();
+// 通过 CetToolPluginContext 的 loadPlugin 方法
+QObject *plugin = m_toolPluginCtx->loadPlugin("CetMyPlugin.dll");
+CetMyPluginInterface *myPlugin = qobject_cast<CetMyPluginInterface*>(plugin);
+if (myPlugin) {
+    myPlugin->doSomething();
 }
 ```
-
-> `LOAD_INTERFACE` 宏定义见 `mainwindow.cpp` 顶部，展开后调用 `loadPlugin()` 并做类型转换和空指针判断。
 
 #### 步骤 5：部署
 
@@ -569,9 +562,9 @@ if (m_cetMyPluginInterface) {
 | 编译器一致性 | 插件必须与主程序使用**相同的编译器和 Qt 版本**（当前：Qt 5.15.2 MinGW 32-bit）编译，否则 `QPluginLoader` 加载会静默失败 |
 | Debug/Release 匹配 | 主程序 Release 版本只能加载 Release 编译的插件，Debug 同理 |
 | IID 字符串 | `Q_PLUGIN_METADATA` 和 `Q_DECLARE_INTERFACE` 中的 IID 必须完全一致，大小写敏感 |
-| 插件父对象 | `loadPlugin()` 会自动将插件实例的 parent 设为 `MainWindow`，插件无需自行管理生命周期 |
-| 插件缺失处理 | 用 `LOAD_INTERFACE` 宏的第三个参数控制是否弹出警告；非必要插件设为 `false` |
-| 调试加载失败 | 可使用 `QPluginLoader::errorString()` 获取详细失败原因 |
+| 插件父对象 | `loadPlugin()` 会自动将插件实例的 parent 设为 `CetToolPluginContext`，插件无需自行管理生命周期 |
+| 完整性校验 | 如需对新 DLL 添加完整性校验，更新 `cettooldlls_hashes.h` 中的哈希值 |
+| CetToolPluginContext 实现 | 该类的 `.cpp` 实现不在主仓库中，位于 `CetToolDLLs` 仓库，通过 INCLUDEPATH 引入编译 |
 
 ---
 
@@ -647,11 +640,11 @@ void ADBConfigure::recvHandle(const QByteArray &data) {
 
 ### 场景三：修改许可证激活时间间隔
 
-修改 `mainwindow.cpp` 中 `initFeaturesPlugin()` 的两处定时器：
+修改 `CetToolPluginContext` 实现中的定时器设置（代码位于 `CetToolDLLs` 仓库）：
 
 ```cpp
-// 首次激活延迟（默认 30 秒）
-QTimer::singleShot(30 * 1000, this, [=]() { ... });
+// 首次激活延迟（默认 10 秒）
+QTimer::singleShot(10 * 1000, this, [=]() { ... });
 
 // 重试间隔初值（默认 30 分钟）
 static int auto_timing_msec = 30 * 60 * 1000;
@@ -721,11 +714,12 @@ Q_DECLARE_INTERFACE(CetYourInterface, "org.qter.plugin.CetYourInterface")
 HEADERS += $$PWD/cetyourinterface.h
 ```
 
-3. **在 MainWindow 中加载**:
+3. **通过 CetToolPluginContext 加载**:
 
 ```cpp
-// mainwindow.cpp
-LOAD_INTERFACE(m_cetYourInterface, "CetYourPlugin.dll", true);
+// 在 CetToolPluginContext 中添加加载逻辑，或直接调用
+QObject *plugin = m_toolPluginCtx->loadPlugin("CetYourPlugin.dll");
+CetYourInterface *yourPlugin = qobject_cast<CetYourInterface*>(plugin);
 ```
 
 ---
@@ -740,6 +734,8 @@ CetDevelopmentKit/
 │   ├── main.cpp                    # 入口
 │   ├── version.h                   # 版本定义
 │   ├── mainwindow/                 # 主窗口
+│   │   ├── mainwindow.h / .cpp
+│   │   └── cettoolplugincontext.h  # 插件上下文（实现在 CetToolDLLs）
 │   ├── modules/ec200u/             # EC200U 差分包模块
 │   ├── modules/adb/                # ADB 打包导出模块
 │   ├── interfaces/                 # 插件接口定义
@@ -754,3 +750,5 @@ CetDevelopmentKit/
 ├── CLAUDE.md                       # Claude Code 指引
 └── README.md                       # 项目说明
 ```
+
+> **注意**: `CetToolPluginContext` 的 `.cpp` 实现位于 `CetToolDLLs` 仓库（`F:\sharefolder\cetqtlearn\CetToolDLLs\`），通过 `CetDevelopmentKit.pro` 中的 `INCLUDEPATH += $$PWD/../../CetToolDLLs` 引入。

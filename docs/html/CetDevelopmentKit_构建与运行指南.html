@@ -295,10 +295,12 @@ body {
 <h1>CetDevelopmentKit 构建与运行指南</h1>
 <h2>一、环境要求</h2>
 <table>
-<thead><tr>
+<thead>
+<tr>
 <th>组件</th>
 <th>版本/说明</th>
-</tr></thead>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td>操作系统</td>
@@ -328,100 +330,121 @@ body {
 <td>Git</td>
 <td>任意版本</td>
 </tr>
-</tbody></table>
-<hr>
+</tbody>
+</table>
+<hr />
 <h2>二、获取源代码</h2>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-bash">git clone &lt;repository-url&gt; CetDevelopmentKit
-cd CetDevelopmentKit</code></pre></div>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>&lt;repository-url&gt;<span class="w"> </span>CetDevelopmentKit
+<span class="nb">cd</span><span class="w"> </span>CetDevelopmentKit
+</code></pre></div></div>
+
 <p>或直接使用已有的源码目录 <code>F:\sharefolder\cetqtlearn\CetDevelopmentKit</code>。</p>
-<hr>
+<hr />
 <h2>三、依赖安装</h2>
 <h3>Windows</h3>
 <h4>1. 安装 Qt 5.15.2</h4>
-<p>通过 Qt 在线安装器安装：</p>
-<ul>
-<li>选择 <code>Desktop Qt 5.15.2 MinGW 32-bit</code> 组件</li>
-<li>确保安装了 <code>Qt Network</code> 模块</li>
-</ul>
+<p>通过 Qt 在线安装器安装：
+- 选择 <code>Desktop Qt 5.15.2 MinGW 32-bit</code> 组件
+- 确保安装了 <code>Qt Network</code> 模块</p>
 <h4>2. 验证安装</h4>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-shell">qmake --version
-# QMake version 3.1
-# Using Qt version 5.15.2 in ...
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>qmake<span class="w"> </span>--version
+<span class="c1"># QMake version 3.1</span>
+<span class="c1"># Using Qt version 5.15.2 in ...</span>
 
-gcc --version
-# 或
-g++.exe --version</code></pre></div>
+gcc<span class="w"> </span>--version
+<span class="c1"># 或</span>
+g++.exe<span class="w"> </span>--version
+</code></pre></div></div>
+
 <h3>Linux / macOS</h3>
-<blockquote>当前版本仅支持 Windows 平台。以下为未来跨平台移植的参考信息。</blockquote>
+<blockquote>
+<p>当前版本仅支持 Windows 平台。以下为未来跨平台移植的参考信息。</p>
+</blockquote>
 <p>Linux:</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-shell">sudo apt install qt5-default qtbase5-dev libqt5widgets5 libqt5network5</code></pre></div>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>qt5-default<span class="w"> </span>qtbase5-dev<span class="w"> </span>libqt5widgets5<span class="w"> </span>libqt5network5
+</code></pre></div></div>
+
 <p>macOS:</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-shell">brew install qt@5</code></pre></div>
-<hr>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>qt@5
+</code></pre></div></div>
+
+<hr />
 <h2>四、构建步骤</h2>
 <h3>方式一：Qt Creator（推荐）</h3>
-<p>1. 启动 <strong>Qt Creator</strong>
-2. 打开项目文件：<code>CetDevelopmentKit/CetDevelopmentKit/CetDevelopmentKit.pro</code>
-3. 选择构建套件：<strong>Desktop Qt 5.15.2 MinGW 32-bit</strong>
-4. 选择构建模式：<strong>Release</strong>（或 Debug）
-5. 点击 <strong>构建</strong> → <strong>构建项目 "CetDevelopmentKit"</strong>（或按 <code>Ctrl+B</code>）</p>
+<ol>
+<li>启动 <strong>Qt Creator</strong></li>
+<li>打开项目文件：<code>CetDevelopmentKit/CetDevelopmentKit/CetDevelopmentKit.pro</code></li>
+<li>选择构建套件：<strong>Desktop Qt 5.15.2 MinGW 32-bit</strong></li>
+<li>选择构建模式：<strong>Release</strong>（或 Debug）</li>
+<li>点击 <strong>构建</strong> → <strong>构建项目 "CetDevelopmentKit"</strong>（或按 <code>Ctrl+B</code>）</li>
+</ol>
 <p>构建输出目录：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code>CetDevelopmentKit/build/build-QMake-CetDevelopmentKit-Desktop_Qt_5_15_2_MinGW_32bit-Release/
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>CetDevelopmentKit/build/build-QMake-CetDevelopmentKit-Desktop_Qt_5_15_2_MinGW_32bit-Release/
   └── release/
-      └── CetDevelopmentKit.exe</code></pre></div>
+      └── CetDevelopmentKit.exe
+</code></pre></div></div>
+
 <h3>方式二：命令行（QMake）</h3>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-shell"># 进入源码目录
-cd CetDevelopmentKit\CetDevelopmentKit
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1"># 进入源码目录</span>
+<span class="nb">cd</span><span class="w"> </span>CetDevelopmentKit<span class="se">\C</span>etDevelopmentKit
 
-# 创建构建目录
-mkdir build-qmake &amp;&amp; cd build-qmake
+<span class="c1"># 创建构建目录</span>
+mkdir<span class="w"> </span>build-qmake<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build-qmake
 
-# 运行 qmake
-qmake ..\CetDevelopmentKit.pro -spec win32-g++ "CONFIG+=release"
+<span class="c1"># 运行 qmake</span>
+qmake<span class="w"> </span>..<span class="se">\C</span>etDevelopmentKit.pro<span class="w"> </span>-spec<span class="w"> </span>win32-g++<span class="w"> </span><span class="s2">&quot;CONFIG+=release&quot;</span>
 
-# 编译
-mingw32-make -j4</code></pre></div>
+<span class="c1"># 编译</span>
+mingw32-make<span class="w"> </span>-j4
+</code></pre></div></div>
+
 <h3>方式三：命令行（CMake）</h3>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-shell"># 进入源码目录
-cd CetDevelopmentKit\CetDevelopmentKit
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1"># 进入源码目录</span>
+<span class="nb">cd</span><span class="w"> </span>CetDevelopmentKit<span class="se">\C</span>etDevelopmentKit
 
-# 创建构建目录
-mkdir build-cmake &amp;&amp; cd build-cmake
+<span class="c1"># 创建构建目录</span>
+mkdir<span class="w"> </span>build-cmake<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build-cmake
 
-# 配置（请根据实际 Qt 路径调整）
-cmake .. -G "MinGW Makefiles" ^
-  -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\mingw81_32 ^
-  -DCMAKE_BUILD_TYPE=Release
+<span class="c1"># 配置（请根据实际 Qt 路径调整）</span>
+cmake<span class="w"> </span>..<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;MinGW Makefiles&quot;</span><span class="w"> </span>^
+<span class="w">  </span>-DCMAKE_PREFIX_PATH<span class="o">=</span>C:<span class="se">\Q</span>t<span class="se">\5</span>.15.2<span class="se">\m</span>ingw81_32<span class="w"> </span>^
+<span class="w">  </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
 
-# 编译
-cmake --build . -j4</code></pre></div>
+<span class="c1"># 编译</span>
+cmake<span class="w"> </span>--build<span class="w"> </span>.<span class="w"> </span>-j4
+</code></pre></div></div>
+
 <p>构建输出目录：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code>CetDevelopmentKit/build/build-CMake-CetDevelopmentKit-Desktop_Qt_5_15_2_MinGW_32bit-Release/
-  └── CetDevelopmentKit.exe</code></pre></div>
-<blockquote><strong>注意</strong>: CMake 构建需要将 <code>CMakeLists.zip</code> 解压到 <code>CetDevelopmentKit/</code> 目录下，或直接使用已有的 <code>CMakeLists.txt</code>。</blockquote>
-<hr>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>CetDevelopmentKit/build/build-CMake-CetDevelopmentKit-Desktop_Qt_5_15_2_MinGW_32bit-Release/
+  └── CetDevelopmentKit.exe
+</code></pre></div></div>
+
+<blockquote>
+<p><strong>注意</strong>: CMake 构建需要将 <code>CMakeLists.zip</code> 解压到 <code>CetDevelopmentKit/</code> 目录下，或直接使用已有的 <code>CMakeLists.txt</code>。</p>
+</blockquote>
+<hr />
 <h2>五、运行方式</h2>
 <h3>调试模式运行</h3>
 <p>在 Qt Creator 中：
 1. 选择 <strong>Debug</strong> 构建配置
 2. 点击 <strong>运行</strong> → <strong>开始调试</strong>（或按 <code>F5</code>）</p>
-<p>调试模式下会启用 <code>qDebug()</code> 输出，包括：</p>
-<ul>
-<li>功能模块切换日志</li>
-<li>命令执行日志</li>
-<li>进程退出码和状态</li>
-<li>激活时序日志</li>
-</ul>
+<p>调试模式下会启用 <code>qDebug()</code> 输出，包括：
+- 功能模块切换日志
+- 命令执行日志
+- 进程退出码和状态
+- 激活时序日志</p>
 <h3>发布模式运行</h3>
 <p><strong>方式一</strong>：在 Qt Creator 中直接运行（选择 Release 配置）。</p>
 <p><strong>方式二</strong>：直接运行编译产物。</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-shell">cd CetDevelopmentKit-Release
-CetDevelopmentKit.exe</code></pre></div>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>CetDevelopmentKit-Release
+CetDevelopmentKit.exe
+</code></pre></div></div>
+
 <p><strong>方式三</strong>：通过安装包安装后运行。</p>
 <p>默认安装路径：<code>D:\Program Files (x86)\CetXiyuan\CetDevelopmentKit\CetDevelopmentKit.exe</code></p>
 <h3>运行目录结构</h3>
 <p>可执行文件运行时需要以下目录结构：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code>CetDevelopmentKit.exe         # 主程序
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>CetDevelopmentKit.exe         # 主程序
 ├── CetProductWizard.dll      # 产品向导链接库
 ├── CetCommandLineTool.exe     # 命令行工具（V2.0.0 起随附）
 ├── plugins/                  # 插件 DLL 目录
@@ -453,37 +476,49 @@ CetDevelopmentKit.exe</code></pre></div>
 │   └── qwindowsvistastyle.dll
 ├── iconengines/
 │   └── qsvgicon.dll          # SVG 图标引擎
-└── imageformats/             # Qt 图像格式插件（由 windeployqt 自动添加）</code></pre></div>
-<hr>
+└── imageformats/             # Qt 图像格式插件（由 windeployqt 自动添加）
+</code></pre></div></div>
+
+<hr />
 <h2>六、打包发布</h2>
 <h3>发布构建流程</h3>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code>1. 修改 version.h        → 更新 VER_MAJOR/VER_MINOR/VER_MICRO、RELEASE_DATE
-2. Qt Creator 编译        → Release 模式构建（Desktop Qt 5.15.2 MinGW 32bit）
-3. 复制产物               → 将 .exe 覆盖到 CetDevelopmentKit-Release/
-4. 修改 .iss 脚本         → 更新 MyAppVersion 与 version.h 保持一致
-5. Inno Setup 编译        → 生成 CetDevelopmentKit-Setup-Release-V&lt;版本&gt;.exe
-6. Git 提交               → 格式：「发布 V&lt;版本&gt;」</code></pre></div>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">修改</span><span class="w"> </span><span class="n">version</span><span class="mf">.</span><span class="n">h</span><span class="w">        </span><span class="err">→</span><span class="w"> </span><span class="n">更新</span><span class="w"> </span><span class="n">VER_MAJOR</span><span class="o">/</span><span class="n">VER_MINOR</span><span class="o">/</span><span class="n">VER_MICRO</span><span class="err">、</span><span class="n">RELEASE_DATE</span><span class="err">、</span><span class="n">IS_RELEASE_VERSION</span>
+<span class="mf">2.</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">Creator</span><span class="w"> </span><span class="n">编译</span><span class="w">        </span><span class="err">→</span><span class="w"> </span><span class="n">Release</span><span class="w"> </span><span class="n">模式构建</span><span class="err">（</span><span class="n">Desktop</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="mf">5.15.2</span><span class="w"> </span><span class="n">MinGW</span><span class="w"> </span><span class="mf">32</span><span class="n">bit</span><span class="err">）</span>
+<span class="mf">3.</span><span class="w"> </span><span class="n">复制产物</span><span class="w">               </span><span class="err">→</span><span class="w"> </span><span class="n">将</span><span class="w"> </span><span class="mf">.</span><span class="n">exe</span><span class="w"> </span><span class="n">覆盖到</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">-</span><span class="n">Release</span><span class="o">/</span>
+<span class="mf">4.</span><span class="w"> </span><span class="n">修改</span><span class="w"> </span><span class="mf">.</span><span class="n">iss</span><span class="w"> </span><span class="n">脚本</span><span class="w">         </span><span class="err">→</span><span class="w"> </span><span class="n">更新</span><span class="w"> </span><span class="n">MyAppVersion</span><span class="w"> </span><span class="n">与</span><span class="w"> </span><span class="n">version</span><span class="mf">.</span><span class="n">h</span><span class="w"> </span><span class="n">保持一致</span>
+<span class="mf">5.</span><span class="w"> </span><span class="n">Inno</span><span class="w"> </span><span class="n">Setup</span><span class="w"> </span><span class="n">编译</span><span class="w">        </span><span class="err">→</span><span class="w"> </span><span class="n">生成</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">-</span><span class="n">Setup</span><span class="o">-</span><span class="n">Release</span><span class="o">-</span><span class="n">V</span><span class="o">&lt;</span><span class="n">版本</span><span class="o">&gt;</span><span class="mf">.</span><span class="n">exe</span>
+<span class="mf">6.</span><span class="w"> </span><span class="n">Git</span><span class="w"> </span><span class="n">提交</span><span class="w">               </span><span class="err">→</span><span class="w"> </span><span class="n">格式</span><span class="err">：「</span><span class="n">发布</span><span class="w"> </span><span class="n">V</span><span class="o">&lt;</span><span class="n">版本</span><span class="o">&gt;</span><span class="err">」</span>
+</code></pre></div></div>
+
 <h3>1. 准备 Release 目录</h3>
 <p>将编译产物和 Qt 运行时 DLL 复制到 <code>CetDevelopmentKit-Release/</code> 目录：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-shell"># 方法一：使用 windeployqt（自动收集 Qt 依赖）
-cd CetDevelopmentKit-Release
-windeployqt --release CetDevelopmentKit.exe
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1"># 方法一：使用 windeployqt（自动收集 Qt 依赖）</span>
+<span class="nb">cd</span><span class="w"> </span>CetDevelopmentKit-Release
+windeployqt<span class="w"> </span>--release<span class="w"> </span>CetDevelopmentKit.exe
 
-# 方法二：手动复制（已准备好的 Release 目录）</code></pre></div>
+<span class="c1"># 方法二：手动复制（已准备好的 Release 目录）</span>
+</code></pre></div></div>
+
 <p><code>CetDevelopmentKit-Release/</code> 目录中已包含所有必要的 Qt 运行时 DLL 和插件。</p>
 <h3>2. 使用 Inno Setup 制作安装包</h3>
-<p>1. 安装 <a href="https://jrsoftware.org/isinfo.php">Inno Setup</a> (6.x)
-2. 打开 <code>CetDevelopmentKit-Setup/CetDevelopmentKit.iss</code>
-3. 确认版本号与 <code>version.h</code> 一致
-4. 点击 <strong>Build</strong> → <strong>Compile</strong></p>
+<ol>
+<li>安装 <a href="https://jrsoftware.org/isinfo.php">Inno Setup</a> (6.x)</li>
+<li>打开 <code>CetDevelopmentKit-Setup/CetDevelopmentKit.iss</code></li>
+<li>确认版本号与 <code>version.h</code> 一致</li>
+<li>点击 <strong>Build</strong> → <strong>Compile</strong></li>
+</ol>
 <p>安装包输出到：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code>CetDevelopmentKit-Setup/Output/CetDevelopmentKit-Setup-Release-V2.4.0.exe</code></pre></div>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>CetDevelopmentKit-Setup/Output/CetDevelopmentKit-Setup-Release-V2.5.0.exe
+</code></pre></div></div>
+
 <h3>3. 安装包配置说明</h3>
 <table>
-<thead><tr>
+<thead>
+<tr>
 <th>配置项</th>
 <th>值</th>
-</tr></thead>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td>应用名称</td>
@@ -495,7 +530,7 @@ windeployqt --release CetDevelopmentKit.exe
 </tr>
 <tr>
 <td>默认安装路径</td>
-<td>`D:\Program Files (x86)\CetXiyuan\CetDevelopmentKit`</td>
+<td><code>D:\Program Files (x86)\CetXiyuan\CetDevelopmentKit</code></td>
 </tr>
 <tr>
 <td>压缩方式</td>
@@ -509,8 +544,9 @@ windeployqt --release CetDevelopmentKit.exe
 <td>桌面快捷方式</td>
 <td>可选（安装时勾选）</td>
 </tr>
-</tbody></table>
-<hr>
+</tbody>
+</table>
+<hr />
 <h2>七、常见问题</h2>
 <h3>1. 编译错误：找不到 Qt5 模块</h3>
 <p><strong>错误</strong>: <code>Project ERROR: Unknown module(s) in QT: widgets</code></p>
@@ -520,49 +556,43 @@ windeployqt --release CetDevelopmentKit.exe
 <p><strong>解决方法</strong>: 确保 <code>CetDevelopmentKit/libs/CetProductWizard.dll</code> 存在。</p>
 <h3>3. 运行时错误：找不到 DLL</h3>
 <p><strong>错误</strong>: "无法启动此程序，因为计算机中丢失 Qt5Core.dll"</p>
-<p><strong>解决方法</strong>:</p>
-<ul>
-<li>使用 <code>windeployqt</code> 自动收集依赖</li>
-<li>或从 Qt 安装目录手动复制所需 DLL 到可执行文件目录</li>
-</ul>
+<p><strong>解决方法</strong>:
+- 使用 <code>windeployqt</code> 自动收集依赖
+- 或从 Qt 安装目录手动复制所需 DLL 到可执行文件目录</p>
 <h3>4. 运行时错误：找不到插件</h3>
 <p><strong>错误</strong>: 菜单项不可用，或提示"缺少插件库"</p>
-<p><strong>解决方法</strong>:</p>
-<ul>
-<li>确保 <code>plugins/</code> 目录存在于以下两个位置之一：</li>
-<li><code>D:/Program Files (x86)/CetXiyuan/CetToolDLLs/plugins/</code></li>
-<li><code>./plugins/</code>（可执行文件同级目录）</li>
-</ul>
+<p><strong>解决方法</strong>:
+- 确保 <code>plugins/</code> 目录存在于以下两个位置之一：
+  - <code>D:/Program Files (x86)/CetXiyuan/CetToolDLLs/plugins/</code>
+  - <code>./plugins/</code>（可执行文件同级目录）</p>
 <h3>5. ADB 功能无法连接设备</h3>
 <p><strong>错误</strong>: 点击执行后无响应或提示连接失败</p>
-<p><strong>解决方法</strong>:</p>
-<ul>
-<li>确保 ADB 工具路径正确（指向 Android SDK 中的 <code>adb.exe</code>）</li>
-<li>确保设备已通过 USB 连接并开启 USB 调试</li>
-<li>运行 <code>adb devices</code> 确认设备已识别</li>
-<li>确保设备用户名和密码正确</li>
-</ul>
+<p><strong>解决方法</strong>:
+- 确保 ADB 工具路径正确（指向 Android SDK 中的 <code>adb.exe</code>）
+- 确保设备已通过 USB 连接并开启 USB 调试
+- 运行 <code>adb devices</code> 确认设备已识别
+- 确保设备用户名和密码正确</p>
 <h3>6. EC200U 差分包制作失败</h3>
 <p><strong>错误</strong>: 工具路径无效或命令执行失败</p>
-<p><strong>解决方法</strong>:</p>
-<ul>
-<li>确保 <code>fotacreate2</code> 工具路径正确</li>
-<li>确保原固件包和新固件包（<code>.pac</code> 文件）路径有效</li>
-<li>确保 <code>fota8910.xml</code> 配置文件存在于工具目录的 <code>setting/</code> 子目录下</li>
-<li>检查输出目录是否有写入权限</li>
-</ul>
+<p><strong>解决方法</strong>:
+- 确保 <code>fotacreate2</code> 工具路径正确
+- 确保原固件包和新固件包（<code>.pac</code> 文件）路径有效
+- 确保 <code>fota8910.xml</code> 配置文件存在于工具目录的 <code>setting/</code> 子目录下
+- 检查输出目录是否有写入权限</p>
 <h3>7. QMake 和 CMake 的区别</h3>
 <table>
-<thead><tr>
+<thead>
+<tr>
 <th>特性</th>
 <th>QMake</th>
 <th>CMake</th>
-</tr></thead>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td>项目文件</td>
-<td>`CetDevelopmentKit.pro`</td>
-<td>`CMakeLists.txt`</td>
+<td><code>CetDevelopmentKit.pro</code></td>
+<td><code>CMakeLists.txt</code></td>
 </tr>
 <tr>
 <td>C++ 标准</td>
@@ -571,26 +601,28 @@ windeployqt --release CetDevelopmentKit.exe
 </tr>
 <tr>
 <td>编译宏</td>
-<td>`QT_DEPRECATED_WARNINGS`, `QT_MESSAGELOGCONTEXT`</td>
-<td>同上 + `BUILD_PRODUCTWIZARD_LIB`</td>
+<td><code>QT_DEPRECATED_WARNINGS</code>, <code>QT_MESSAGELOGCONTEXT</code></td>
+<td>同上 + <code>BUILD_PRODUCTWIZARD_LIB</code></td>
 </tr>
 <tr>
 <td>推荐用途</td>
 <td>日常开发（与 Qt Creator 集成更好）</td>
 <td>跨平台构建 / CI 集成</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <h3>8. 清理构建缓存</h3>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><pre><code class="language-shell"># QMake 构建
-cd CetDevelopmentKit\build\build-QMake-...-Release
-mingw32-make clean
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1"># QMake 构建</span>
+<span class="nb">cd</span><span class="w"> </span>CetDevelopmentKit<span class="se">\b</span>uild<span class="se">\b</span>uild-QMake-...-Release
+mingw32-make<span class="w"> </span>clean
 
-# CMake 构建
-cd CetDevelopmentKit\build\build-CMake-...-Release
-cmake --build . --target clean
+<span class="c1"># CMake 构建</span>
+<span class="nb">cd</span><span class="w"> </span>CetDevelopmentKit<span class="se">\b</span>uild<span class="se">\b</span>uild-CMake-...-Release
+cmake<span class="w"> </span>--build<span class="w"> </span>.<span class="w"> </span>--target<span class="w"> </span>clean
 
-# 或直接删除整个 build 目录
-rm -rf CetDevelopmentKit\build</code></pre></div>
+<span class="c1"># 或直接删除整个 build 目录</span>
+rm<span class="w"> </span>-rf<span class="w"> </span>CetDevelopmentKit<span class="se">\b</span>uild
+</code></pre></div></div>
     </div>
     <div id="doc-footer">📄 文档转换 · 筆名 CetXiyuan</div>
 </div>

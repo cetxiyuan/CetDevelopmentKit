@@ -204,7 +204,7 @@ CetDevelopmentKit.exe         # 主程序
 ### 发布构建流程
 
 ```
-1. 修改 version.h        → 更新 VER_MAJOR/VER_MINOR/VER_MICRO、RELEASE_DATE
+1. 修改 version.h        → 更新 VER_MAJOR/VER_MINOR/VER_MICRO、RELEASE_DATE、IS_RELEASE_VERSION
 2. Qt Creator 编译        → Release 模式构建（Desktop Qt 5.15.2 MinGW 32bit）
 3. 复制产物               → 将 .exe 覆盖到 CetDevelopmentKit-Release/
 4. 修改 .iss 脚本         → 更新 MyAppVersion 与 version.h 保持一致
@@ -236,7 +236,7 @@ windeployqt --release CetDevelopmentKit.exe
 安装包输出到：
 
 ```
-CetDevelopmentKit-Setup/Output/CetDevelopmentKit-Setup-Release-V2.4.0.exe
+CetDevelopmentKit-Setup/Output/CetDevelopmentKit-Setup-Release-V2.5.0.exe
 ```
 
 ### 3. 安装包配置说明
