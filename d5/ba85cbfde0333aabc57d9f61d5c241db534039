@@ -1,0 +1,21 @@
+CetDevelopmentKit-Release/LICENSE/license
+  s_72fb82aba9e8d8::t_9350433a117081 2-4,6
+CetDevelopmentKit/version.h
+  s_72fb82aba9e8d8::t_001f729e36fa1f 13-14,22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d5ba85cbfde0333aabc57d9f61d5c241db534039",
+  "prompts": {},
+  "sessions": {
+    "s_72fb82aba9e8d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a03feef9-e220-4bac-a2b6-e3c9719d0cd7",
+        "model": "glm-5.3"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    }
+  }
+}
