@@ -1,0 +1,16 @@
+CetDevelopmentKit-Setup/CetDevelopmentKit.iss
+  h_3862d906f6c2ff 5,11
+CetDevelopmentKit/version.h
+  h_3862d906f6c2ff 5,25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "214e5cc83df047667af3e44209ea0df0e33510a5",
+  "prompts": {},
+  "humans": {
+    "h_3862d906f6c2ff": {
+      "author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    }
+  }
+}
