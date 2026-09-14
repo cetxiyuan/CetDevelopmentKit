@@ -6,12 +6,14 @@
 <title>CetDevelopmentKit 构建与运行指南</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/shell.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
 <style>
@@ -444,39 +446,44 @@ CetDevelopmentKit.exe
 <p>默认安装路径：<code>D:\Program Files (x86)\CetXiyuan\CetDevelopmentKit\CetDevelopmentKit.exe</code></p>
 <h3>运行目录结构</h3>
 <p>可执行文件运行时需要以下目录结构：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>CetDevelopmentKit.exe         # 主程序
-├── CetProductWizard.dll      # 产品向导链接库
-├── CetCommandLineTool.exe     # 命令行工具（V2.0.0 起随附）
-├── plugins/                  # 插件 DLL 目录
-│   ├── CetLicensePlugin.dll
-│   ├── CetUpdatePlugin.dll
-│   ├── CetLogManagerPlugin.dll
-│   └── CetProgressPlugin.dll
-├── Configs/                  # 配置文件目录（自动创建）
-│   ├── AppMaster.ini
-│   ├── EC200UConfigure.ini
-│   └── ADBConfigure.ini
-├── Qt5Core.dll               # Qt 运行时 DLL
-├── Qt5Gui.dll
-├── Qt5Network.dll
-├── Qt5Widgets.dll
-├── Qt5Svg.dll                # Qt SVG 支持
-├── libEGL.dll                # Qt ANGLE / OpenGL
-├── libGLESv2.dll
-├── D3Dcompiler_47.dll
-├── opengl32sw.dll
-├── libcrypto-1_1.dll         # OpenSSL（供 Qt Network HTTPS）
-├── libssl-1_1.dll
-├── libgcc_s_dw2-1.dll        # MinGW 运行时
-├── libstdc++-6.dll
-├── libwinpthread-1.dll
-├── platforms/
-│   └── qwindows.dll          # Qt Windows 平台插件
-├── styles/
-│   └── qwindowsvistastyle.dll
-├── iconengines/
-│   └── qsvgicon.dll          # SVG 图标引擎
-└── imageformats/             # Qt 图像格式插件（由 windeployqt 自动添加）
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="n">CetDevelopmentKit</span><span class="p">.</span><span class="n">exe</span><span class="w">         </span><span class="err">#</span><span class="w"> </span><span class="n">主程序</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">CetProductWizard</span><span class="p">.</span><span class="n">dll</span><span class="w">      </span><span class="err">#</span><span class="w"> </span><span class="n">产品向导链接库</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">CetCommandLineTool</span><span class="p">.</span><span class="n">exe</span><span class="w">     </span><span class="err">#</span><span class="w"> </span><span class="n">命令行工具</span><span class="err">（</span><span class="n">V2</span><span class="mf">.0.0</span><span class="w"> </span><span class="n">起随附</span><span class="err">）</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">plugins</span><span class="o">/</span><span class="w">                  </span><span class="err">#</span><span class="w"> </span><span class="n">插件</span><span class="w"> </span><span class="n">DLL</span><span class="w"> </span><span class="n">目录</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetLicensePlugin</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetUpdatePlugin</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetLogManagerPlugin</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetProgressPlugin</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetCANPlugin</span><span class="p">.</span><span class="n">dll</span><span class="w">      </span><span class="err">#</span><span class="w"> </span><span class="n">CAN</span><span class="w"> </span><span class="n">报文收发插件</span><span class="err">（</span><span class="n">CetCANInterface</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetPlugins</span><span class="p">.</span><span class="n">ini</span><span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">更新服务地址配置</span><span class="err">（</span><span class="o">[</span><span class="n">CetWebs</span><span class="o">]</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">purchase</span><span class="p">.</span><span class="n">html</span><span class="w">         </span><span class="err">#</span><span class="w"> </span><span class="n">购买</span><span class="o">/</span><span class="n">激活提示页</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">Configs</span><span class="o">/</span><span class="w">                  </span><span class="err">#</span><span class="w"> </span><span class="n">配置文件目录</span><span class="err">（</span><span class="n">自动创建</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">AppMaster</span><span class="p">.</span><span class="n">ini</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">EC200UConfigure</span><span class="p">.</span><span class="n">ini</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">ADBConfigure</span><span class="p">.</span><span class="n">ini</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">Qt5Core</span><span class="p">.</span><span class="n">dll</span><span class="w">               </span><span class="err">#</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">运行时</span><span class="w"> </span><span class="n">DLL</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">Qt5Gui</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">Qt5Network</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">Qt5Widgets</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">Qt5Svg</span><span class="p">.</span><span class="n">dll</span><span class="w">                </span><span class="err">#</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">SVG</span><span class="w"> </span><span class="n">支持</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">libEGL</span><span class="p">.</span><span class="n">dll</span><span class="w">                </span><span class="err">#</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">ANGLE</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">OpenGL</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">libGLESv2</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">D3Dcompiler_47</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">opengl32sw</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">libcrypto</span><span class="o">-</span><span class="mi">1</span><span class="n">_1</span><span class="p">.</span><span class="n">dll</span><span class="w">         </span><span class="err">#</span><span class="w"> </span><span class="n">OpenSSL</span><span class="err">（</span><span class="n">供</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">Network</span><span class="w"> </span><span class="n">HTTPS</span><span class="err">）</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">libssl</span><span class="o">-</span><span class="mi">1</span><span class="n">_1</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">libgcc_s_dw2</span><span class="o">-</span><span class="mf">1.</span><span class="n">dll</span><span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">MinGW</span><span class="w"> </span><span class="n">运行时</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">libstdc</span><span class="o">++-</span><span class="mf">6.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">libwinpthread</span><span class="o">-</span><span class="mf">1.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">platforms</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">qwindows</span><span class="p">.</span><span class="n">dll</span><span class="w">          </span><span class="err">#</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">Windows</span><span class="w"> </span><span class="n">平台插件</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">styles</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">qwindowsvistastyle</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">iconengines</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">qsvgicon</span><span class="p">.</span><span class="n">dll</span><span class="w">          </span><span class="err">#</span><span class="w"> </span><span class="n">SVG</span><span class="w"> </span><span class="n">图标引擎</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">imageformats</span><span class="o">/</span><span class="w">             </span><span class="err">#</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">图像格式插件</span><span class="err">（</span><span class="n">由</span><span class="w"> </span><span class="n">windeployqt</span><span class="w"> </span><span class="n">自动添加</span><span class="err">）</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">translations</span><span class="o">/</span><span class="w">             </span><span class="err">#</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">内置翻译</span><span class="err">（</span><span class="n">qt_</span><span class="o">*</span><span class="p">.</span><span class="n">qm</span><span class="err">）</span>
+<span class="err">└──</span><span class="w"> </span><span class="n">LICENSE</span><span class="o">/</span><span class="w">                  </span><span class="err">#</span><span class="w"> </span><span class="n">授权文件目录</span>
 </code></pre></div></div>
 
 <hr />
@@ -508,7 +515,7 @@ windeployqt<span class="w"> </span>--release<span class="w"> </span>CetDevelopme
 <li>点击 <strong>Build</strong> → <strong>Compile</strong></li>
 </ol>
 <p>安装包输出到：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>CetDevelopmentKit-Setup/Output/CetDevelopmentKit-Setup-Release-V2.5.0.exe
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>CetDevelopmentKit-Setup/Output/CetDevelopmentKit-Setup-Release-V2.6.0.exe
 </code></pre></div></div>
 
 <h3>3. 安装包配置说明</h3>
@@ -624,7 +631,7 @@ cmake<span class="w"> </span>--build<span class="w"> </span>.<span class="w"> </
 rm<span class="w"> </span>-rf<span class="w"> </span>CetDevelopmentKit<span class="se">\b</span>uild
 </code></pre></div></div>
     </div>
-    <div id="doc-footer">📄 文档转换 · 筆名 CetXiyuan</div>
+    <div id="doc-footer">📄 文档转换 · 笔名 CetXiyuan</div>
 </div>
 <div id="toast"></div>
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-CetDevelopmentKit 是一个基于 Qt 5.15.2 (MinGW 32-bit) 的 Windows 桌面开发集成工具包，当前版本 V2.5.0，归属 CetXiyuan 公司。主要功能：
+CetDevelopmentKit 是一个基于 Qt 5.15.2 (MinGW 32-bit) 的 Windows 桌面开发集成工具包，当前版本 V2.6.0.8281，归属 CetXiyuan 公司。主要功能：
 - **EC200U 差分包制作**：生成 EC200U 模块的 OTA 差分升级包
 - **ADB 设备数据打包导出**：通过 ADB 连接 Android 设备并打包导出数据
 
@@ -37,7 +37,7 @@ CetDevelopmentKit 是一个基于 Qt 5.15.2 (MinGW 32-bit) 的 Windows 桌面开
 
 版本号统一在 `CetDevelopmentKit/version.h` 中维护：
 - `VER_MAJOR` / `VER_MINOR` / `VER_MICRO`：三段式版本号
-- `RELEASE_DATE`：采用内部编码格式，如 `(CXYQK5152.CDPK250.G716)`
+- `RELEASE_DATE`：采用内部编码格式，如 `(CXYQK5152.CDPK260.G832)`
 - `IS_RELEASE_VERSION`：1 为正式版，0 为补丁版（补丁号由 `PATCH_PACKET` 指定）
 - 发布时同步更新 `CetDevelopmentKit-Setup/CetDevelopmentKit.iss` 中的 `MyAppVersion`
 
@@ -60,11 +60,11 @@ CetDevelopmentKit 是一个基于 Qt 5.15.2 (MinGW 32-bit) 的 Windows 桌面开
 | `cetlogmanagerinterface.h` | `CetLogManagerPlugin.dll` | 日志管理窗口 |
 | `cetprogressinterface.h` | `CetProgressPlugin.dll` | 进度显示 |
 
-`CetProductWizard.dll` 位于 `CetDevelopmentKit/libs/`，编译时隐式链接，运行时由 `CetToolPluginContext` 做 SHA256 哈希校验。`CetToolPluginContext` 的源码位于 `CetToolDLLs` 仓库，通过 `INCLUDEPATH += $$PWD/../../CetToolDLLs` 引入。
+`CetProductWizard.dll` 位于 `CetDevelopmentKit/libs/`，编译时隐式链接，运行时由 `CetToolPluginContext` 做 SHA256 哈希校验（对 `CetLicensePlugin` / `CetUpdatePlugin` / `CetProgressPlugin` 亦做 SHA256 校验）。`CetToolPluginContext` 的源码位于 `CetToolDLLs` 仓库，通过 `INCLUDEPATH += $$PWD/../../CetToolDLLs` 引入。
 
 ### 许可证激活逻辑
 
-首次启动 10 秒后自动触发激活，之后按 30→60→120 分钟指数退避重试。未激活时主界面 `centralWidget` 被禁用。激活以 `PRODUCT_NAME`（= `APP_NAME` + 版本数字，如 `CetDevelopmentKit250`）作为产品 ID。许可 3.0 引入 Ed25519 签名验证和临时授权支持，被拒绝后停止重试。
+首次启动 30 秒后自动触发激活，之后按 10→20→40→… 分钟指数退避重试（超过 24 小时重置为 10 分钟）。未激活时主界面 `centralWidget` 被禁用。激活以 `PRODUCT_NAME`（= `APP_NAME` + 版本数字，如 `CetDevelopmentKit260`）作为产品 ID。许可 3.0 引入 Ed25519 签名验证和临时授权支持。
 
 ### 功能模块结构
 

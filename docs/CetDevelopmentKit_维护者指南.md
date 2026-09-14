@@ -20,7 +20,7 @@
 
 - 使用 **4 个空格** 缩进（不使用 Tab）
 - 左大括号不换行（K&R 风格）
-- 条件/循环必须使用大括号（即使单行语句）
+- 条件/循环建议使用大括号；现有代码中单行 `if` 也存在省略大括号的写法（如 `if (!toolPath.isEmpty()) ui->toolPathLineEdit->setText(toolPath);`）
 
 ```cpp
 // 正确
@@ -181,12 +181,12 @@ private slots:
 
 | 场景 | 预期结果 |
 |------|---------|
-| 首次启动（无配置文件） | 正常启动，10 秒后触发激活 |
+| 首次启动（无配置文件） | 正常启动，30 秒后触发激活 |
 | 已激活状态启动 | 正常进入主界面，中央控件可用 |
 | 未激活状态启动 | 中央控件禁用，显示到期提示 |
 | 切换功能模块 | 配置面板切换，日志区清空 |
 | 配置文件持久化 | 关闭重开后配置恢复 |
-| DLL 完整性校验 | CetProductWizard.dll 哈希匹配，校验通过 |
+| DLL 完整性校验 | CetProductWizard.dll 及各 Cet 插件 DLL 哈希匹配，校验通过 |
 
 ---
 
@@ -277,9 +277,9 @@ if (!loader.instance()) {
 
 ```cpp
 #define VER_MAJOR               2
-#define VER_MINOR               5
+#define VER_MINOR               6
 #define VER_MICRO               0
-#define RELEASE_DATE            "(CXYQK5152.CDPK250.G716)"
+#define RELEASE_DATE            "(CXYQK5152.CDPK260.G832)"
 #define IS_RELEASE_VERSION      ( 1 )
 ```
 
@@ -288,13 +288,13 @@ if (!loader.instance()) {
 编辑 `CetDevelopmentKit-Setup/CetDevelopmentKit.iss`:
 
 ```iss
-#define MyAppVersion "2.5.0"
+#define MyAppVersion "2.6.0"
 ```
 
 ### 3. 更新 CHANGELOG.md
 
 ```markdown
-## [2.5.0] - 2026-07-09
+## [2.6.0] - 2026-08-24
 
 ### 新增
 - xxx
@@ -330,8 +330,8 @@ mkdir plugins
 
 ```shell
 git add CetDevelopmentKit/version.h CetDevelopmentKit-Setup/CetDevelopmentKit.iss CHANGELOG.md
-git commit -m "发布正式版 V2.5.0"
-git tag -a v2.5.0 -m "Release V2.5.0"
+git commit -m "发布正式版 V2.6.0"
+git tag -a v2.6.0 -m "Release V2.6.0"
 git push origin master --tags
 ```
 
@@ -491,9 +491,11 @@ CONFIG   += c++11
 # 插件 DLL 名称
 TARGET = CetMyPlugin
 
-# 引入主工程的接口头文件
+# 引入主工程的接口头文件（也可在插件目录内保留一份接口头文件副本）
 INCLUDEPATH += ../../../CetDevelopmentKit/CetDevelopmentKit/interfaces
 ```
+
+> 实际约定：`CetUpdatePlugin` / `CetLogManagerPlugin` / `CetProgressPlugin` 等在每个插件目录内各自保留一份接口头文件副本；`CetLicensePlugin` 则从 `CetToolLicense` 仓库（`$$PWD/../../../CetToolLicense/CetToolLicense`）引入许可相关头文件。
 
 #### 步骤 3：实现插件类
 
@@ -535,7 +537,7 @@ void CetMyPlugin::doSomething()
 
 **方式一（推荐）：扩展 CetToolPluginContext**
 
-在 `CetToolDLLs/CetToolDLLs/` 的 `CetToolPluginContext` 实现中添加新接口的加载逻辑。
+在 `CetToolDLLs/CetToolLibs/CetProductWizard/cettoolplugincontext.cpp` 的 `CetToolPluginContext` 实现中添加新接口的加载逻辑。
 
 **方式二：在 MainWindow 中直接调用**
 
@@ -562,7 +564,7 @@ if (myPlugin) {
 | 编译器一致性 | 插件必须与主程序使用**相同的编译器和 Qt 版本**（当前：Qt 5.15.2 MinGW 32-bit）编译，否则 `QPluginLoader` 加载会静默失败 |
 | Debug/Release 匹配 | 主程序 Release 版本只能加载 Release 编译的插件，Debug 同理 |
 | IID 字符串 | `Q_PLUGIN_METADATA` 和 `Q_DECLARE_INTERFACE` 中的 IID 必须完全一致，大小写敏感 |
-| 插件父对象 | `loadPlugin()` 会自动将插件实例的 parent 设为 `CetToolPluginContext`，插件无需自行管理生命周期 |
+| 插件父对象 | `loadPlugin()` 对 QWidget 类插件将其 parent 设为主窗口（`parentWidget()`），其余插件则设为 `CetToolPluginContext` 自身，插件无需自行管理生命周期 |
 | 完整性校验 | 如需对新 DLL 添加完整性校验，更新 `cettooldlls_hashes.h` 中的哈希值 |
 | CetToolPluginContext 实现 | 该类的 `.cpp` 实现不在主仓库中，位于 `CetToolDLLs` 仓库，通过 INCLUDEPATH 引入编译 |
 
@@ -599,6 +601,8 @@ void EC200UConfigure::on_outputNameLineEdit_textChanged(const QString &arg1) {
     m_settings->endGroup();
 }
 ```
+
+> 注意：源码中 EC200U 模块的 `outputName` **有意不做持久化**（每次任务文件名不同，见《架构设计》4.3），上面的"恢复配置/保存槽"仅为演示"新增一个配置项"的通用流程，并非该模块的实际实现。
 
 ### 场景二：修改接收缓存大小
 
@@ -643,14 +647,16 @@ void ADBConfigure::recvHandle(const QByteArray &data) {
 修改 `CetToolPluginContext` 实现中的定时器设置（代码位于 `CetToolDLLs` 仓库）：
 
 ```cpp
-// 首次激活延迟（默认 10 秒）
-QTimer::singleShot(10 * 1000, this, [=]() { ... });
+// 首次激活延迟（默认 30 秒）
+QTimer::singleShot(30 * 1000, this, [=]() { ... });
 
-// 重试间隔初值（默认 30 分钟）
-static int auto_timing_msec = 30 * 60 * 1000;
+// 重试间隔初值（默认 10 分钟）
+static int auto_timing_msec = 10 * 60 * 1000;
 
-// 指数退避倍数（默认 2 倍）
+// 指数退避倍数（默认 2 倍），超过 24 小时重置回 10 分钟
 auto_timing_msec = auto_timing_msec * 2;
+if (auto_timing_msec > 24 * 60 * 60 * 1000)
+    auto_timing_msec = 10 * 60 * 1000;
 ```
 
 ### 场景四：修改 QSettings 配置文件路径

@@ -169,7 +169,10 @@ CetDevelopmentKit.exe         # 主程序
 │   ├── CetLicensePlugin.dll
 │   ├── CetUpdatePlugin.dll
 │   ├── CetLogManagerPlugin.dll
-│   └── CetProgressPlugin.dll
+│   ├── CetProgressPlugin.dll
+│   ├── CetCANPlugin.dll      # CAN 报文收发插件（CetCANInterface）
+│   ├── CetPlugins.ini        # 更新服务地址配置（[CetWebs]）
+│   └── purchase.html         # 购买/激活提示页
 ├── Configs/                  # 配置文件目录（自动创建）
 │   ├── AppMaster.ini
 │   ├── EC200UConfigure.ini
@@ -194,7 +197,9 @@ CetDevelopmentKit.exe         # 主程序
 │   └── qwindowsvistastyle.dll
 ├── iconengines/
 │   └── qsvgicon.dll          # SVG 图标引擎
-└── imageformats/             # Qt 图像格式插件（由 windeployqt 自动添加）
+├── imageformats/             # Qt 图像格式插件（由 windeployqt 自动添加）
+├── translations/             # Qt 内置翻译（qt_*.qm）
+└── LICENSE/                  # 授权文件目录
 ```
 
 ---
@@ -236,7 +241,7 @@ windeployqt --release CetDevelopmentKit.exe
 安装包输出到：
 
 ```
-CetDevelopmentKit-Setup/Output/CetDevelopmentKit-Setup-Release-V2.5.0.exe
+CetDevelopmentKit-Setup/Output/CetDevelopmentKit-Setup-Release-V2.6.0.exe
 ```
 
 ### 3. 安装包配置说明

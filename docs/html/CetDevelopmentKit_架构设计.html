@@ -6,12 +6,14 @@
 <title>CetDevelopmentKit 架构设计</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/shell.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
 <style>
@@ -308,7 +310,7 @@ body {
 </tr>
 <tr>
 <td>当前版本</td>
-<td>V2.5.0</td>
+<td>V2.6.0.8281</td>
 </tr>
 <tr>
 <td>技术栈</td>
@@ -400,57 +402,60 @@ body {
 <li><strong>配置即时持久化</strong>：用户输入字段变更时立即写入 <code>QSettings</code> INI 文件，无需手动保存（个别仅用于当次任务且每次必变的字段如输出文件名除外）。</li>
 <li><strong>HiDPI 自适应</strong>：<code>main.cpp</code> 启动时启用 <code>AA_EnableHighDpiScaling</code> + <code>PassThrough</code> 舍入策略，确保高分辨率屏幕正确缩放。</li>
 <li><strong>跨平台风格一致</strong>：通过 <code>QStyleFactory::create(list.last())</code> 选取系统最终可用风格（通常为 Fusion），保证 UI 外观统一。</li>
-<li><strong>插件完整性校验</strong>：<code>CetToolPluginContext</code> 构造时通过 <code>selfIntegrityCheck()</code> 对 <code>CetProductWizard.dll</code> 做 SHA256 哈希校验，防止 DLL 被替换。</li>
+<li><strong>插件完整性校验</strong>：<code>CetToolPluginContext</code> 对自身 <code>CetProductWizard.dll</code> 做自完整性校验，并对 <code>CetLicensePlugin</code> / <code>CetUpdatePlugin</code> / <code>CetProgressPlugin</code> 做 SHA256 哈希校验，防止 DLL 被替换（详见 5.3）。</li>
 </ol>
 <hr />
 <h2>三、目录结构说明</h2>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="n">CetDevelopmentKit</span><span class="o">/</span><span class="w">                  </span><span class="err">←</span><span class="w"> </span><span class="err">仓库根目录</span>
-<span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">/</span><span class="w">              </span><span class="err">←</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="err">工程源码目录</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">.</span><span class="n">pro</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">QMake</span><span class="w"> </span><span class="err">工程文件（主入口）</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CMakeLists</span><span class="o">.</span><span class="n">txt</span><span class="w">              </span><span class="err">←</span><span class="w"> </span><span class="n">CMake</span><span class="w"> </span><span class="err">构建文件</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">main</span><span class="o">.</span><span class="n">cpp</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="err">程序入口</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">version</span><span class="o">.</span><span class="n">h</span><span class="w">                   </span><span class="err">←</span><span class="w"> </span><span class="err">全局版本号定义</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">app</span><span class="o">.</span><span class="n">rc</span><span class="w">                      </span><span class="err">←</span><span class="w"> </span><span class="n">Windows</span><span class="w"> </span><span class="err">资源文件（图标</span><span class="o">/</span><span class="err">版本信息）</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">interfaces</span><span class="o">/</span><span class="w">                 </span><span class="err">←</span><span class="w"> </span><span class="err">插件接口定义（纯虚类</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Q_DECLARE_INTERFACE</span><span class="err">）</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cetlicenseinterface</span><span class="o">.</span><span class="n">h</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cetupdateinterface</span><span class="o">.</span><span class="n">h</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cetlogmanagerinterface</span><span class="o">.</span><span class="n">h</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cetprogressinterface</span><span class="o">.</span><span class="n">h</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">interfaces</span><span class="o">.</span><span class="n">pri</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">mainwindow</span><span class="o">/</span><span class="w">                 </span><span class="err">←</span><span class="w"> </span><span class="err">主窗口模块</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">mainwindow</span><span class="o">.</span><span class="n">h</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="o">.</span><span class="n">cpp</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cettoolplugincontext</span><span class="o">.</span><span class="n">h</span><span class="w">  </span><span class="err">←</span><span class="w"> </span><span class="err">插件上下文管理器（源码在</span><span class="w"> </span><span class="n">CetToolDLLs</span><span class="err">）</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">mainwindow</span><span class="o">.</span><span class="n">ui</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">mainwindow</span><span class="o">.</span><span class="n">pri</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">modules</span><span class="o">/</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="err">功能模块（每个子目录为一个工具模块）</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">modules</span><span class="o">.</span><span class="n">pri</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">ec200u</span><span class="o">/</span><span class="w">                 </span><span class="err">←</span><span class="w"> </span><span class="n">EC200U</span><span class="w"> </span><span class="err">差分包制作模块</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">ec200uconfigure</span><span class="o">.</span><span class="n">h</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="o">.</span><span class="n">cpp</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">ec200uconfigure</span><span class="o">.</span><span class="n">ui</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">ec200u</span><span class="o">.</span><span class="n">pri</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">adb</span><span class="o">/</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="n">ADB</span><span class="w"> </span><span class="err">设备数据导出模块</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">       </span><span class="err">├──</span><span class="w"> </span><span class="n">adbconfigure</span><span class="o">.</span><span class="n">h</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="o">.</span><span class="n">cpp</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">       </span><span class="err">├──</span><span class="w"> </span><span class="n">adbconfigure</span><span class="o">.</span><span class="n">ui</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">       </span><span class="err">└──</span><span class="w"> </span><span class="n">adb</span><span class="o">.</span><span class="n">pri</span>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="n">CetDevelopmentKit</span><span class="o">/</span><span class="w">                  </span><span class="err">←</span><span class="w"> </span><span class="n">仓库根目录</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">/</span><span class="w">              </span><span class="err">←</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">工程源码目录</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="p">.</span><span class="n">pro</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">QMake</span><span class="w"> </span><span class="n">工程文件</span><span class="err">（</span><span class="n">主入口</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CMakeLists</span><span class="p">.</span><span class="n">txt</span><span class="w">              </span><span class="err">←</span><span class="w"> </span><span class="n">CMake</span><span class="w"> </span><span class="n">构建文件</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="n">cpp</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="n">程序入口</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">version</span><span class="p">.</span><span class="n">h</span><span class="w">                   </span><span class="err">←</span><span class="w"> </span><span class="n">全局版本号定义</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">rc</span><span class="w">                      </span><span class="err">←</span><span class="w"> </span><span class="n">Windows</span><span class="w"> </span><span class="n">资源文件</span><span class="err">（</span><span class="n">图标</span><span class="o">/</span><span class="n">版本信息</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">interfaces</span><span class="o">/</span><span class="w">                 </span><span class="err">←</span><span class="w"> </span><span class="n">插件接口定义</span><span class="err">（</span><span class="n">纯虚类</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Q_DECLARE_INTERFACE</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cetlicenseinterface</span><span class="p">.</span><span class="n">h</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cetupdateinterface</span><span class="p">.</span><span class="n">h</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cetlogmanagerinterface</span><span class="p">.</span><span class="n">h</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cetprogressinterface</span><span class="p">.</span><span class="n">h</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">interfaces</span><span class="p">.</span><span class="n">pri</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">mainwindow</span><span class="o">/</span><span class="w">                 </span><span class="err">←</span><span class="w"> </span><span class="n">主窗口模块</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">mainwindow</span><span class="p">.</span><span class="n">h</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">.</span><span class="n">cpp</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">cettoolplugincontext</span><span class="p">.</span><span class="n">h</span><span class="w">  </span><span class="err">←</span><span class="w"> </span><span class="n">插件上下文管理器</span><span class="err">（</span><span class="n">源码在</span><span class="w"> </span><span class="n">CetToolDLLs</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">mainwindow</span><span class="p">.</span><span class="n">ui</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">mainwindow</span><span class="p">.</span><span class="n">pri</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">modules</span><span class="o">/</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="n">功能模块</span><span class="err">（</span><span class="n">每个子目录为一个工具模块</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">modules</span><span class="p">.</span><span class="n">pri</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">ec200u</span><span class="o">/</span><span class="w">                 </span><span class="err">←</span><span class="w"> </span><span class="n">EC200U</span><span class="w"> </span><span class="n">差分包制作模块</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">ec200uconfigure</span><span class="p">.</span><span class="n">h</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">.</span><span class="n">cpp</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">ec200uconfigure</span><span class="p">.</span><span class="n">ui</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">ec200u</span><span class="p">.</span><span class="n">pri</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">adb</span><span class="o">/</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="n">ADB</span><span class="w"> </span><span class="n">设备数据导出模块</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">       </span><span class="err">├──</span><span class="w"> </span><span class="n">adbconfigure</span><span class="p">.</span><span class="n">h</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">.</span><span class="n">cpp</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">       </span><span class="err">├──</span><span class="w"> </span><span class="n">adbconfigure</span><span class="p">.</span><span class="n">ui</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">       </span><span class="err">└──</span><span class="w"> </span><span class="n">adb</span><span class="p">.</span><span class="n">pri</span>
 <span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">libs</span><span class="o">/</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">CetProductWizard</span><span class="o">.</span><span class="n">dll</span><span class="w">    </span><span class="err">←</span><span class="w"> </span><span class="err">动态链接库（产品向导，编译时链接）</span>
-<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">build</span><span class="o">/</span><span class="w">                      </span><span class="err">←</span><span class="w"> </span><span class="err">构建输出目录（不入版本库）</span>
-<span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">-</span><span class="n">Release</span><span class="o">/</span><span class="w">      </span><span class="err">←</span><span class="w"> </span><span class="err">发布运行目录</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">.</span><span class="n">exe</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetCommandLineTool</span><span class="o">.</span><span class="n">exe</span><span class="w">      </span><span class="err">←</span><span class="w"> </span><span class="err">命令行工具（</span><span class="n">V2</span><span class="o">.</span><span class="mf">0.0</span><span class="w"> </span><span class="err">起随附）</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetProductWizard</span><span class="o">.</span><span class="n">dll</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">plugins</span><span class="o">/</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="err">运行时插件目录</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetLicensePlugin</span><span class="o">.</span><span class="n">dll</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetUpdatePlugin</span><span class="o">.</span><span class="n">dll</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetLogManagerPlugin</span><span class="o">.</span><span class="n">dll</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetProgressPlugin</span><span class="o">.</span><span class="n">dll</span>
-<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">CetPlugins</span><span class="o">.</span><span class="n">ini</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">Qt5</span><span class="o">*.</span><span class="n">dll</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">lib</span><span class="o">*.</span><span class="n">dll</span><span class="w">         </span><span class="err">←</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="err">运行时依赖</span>
-<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">LICENSE</span><span class="o">/</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="err">授权文件目录</span>
-<span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">-</span><span class="n">Setup</span><span class="o">/</span><span class="w">        </span><span class="err">←</span><span class="w"> </span><span class="err">安装包工程</span>
-<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">.</span><span class="n">iss</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">Inno</span><span class="w"> </span><span class="n">Setup</span><span class="w"> </span><span class="err">脚本</span>
-<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">Output</span><span class="o">/</span><span class="w">                     </span><span class="err">←</span><span class="w"> </span><span class="err">生成的安装包</span><span class="w"> </span><span class="o">.</span><span class="n">exe</span>
-<span class="err">└──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">-</span><span class="n">Patch</span><span class="o">/</span><span class="w">        </span><span class="err">←</span><span class="w"> </span><span class="err">补丁包目录</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">CetProductWizard</span><span class="p">.</span><span class="n">dll</span><span class="w">    </span><span class="err">←</span><span class="w"> </span><span class="n">动态链接库</span><span class="err">（</span><span class="n">产品向导</span><span class="err">，</span><span class="n">编译时链接</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">build</span><span class="o">/</span><span class="w">                      </span><span class="err">←</span><span class="w"> </span><span class="n">构建输出目录</span><span class="err">（</span><span class="n">不入版本库</span><span class="err">）</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">-</span><span class="k">Release</span><span class="o">/</span><span class="w">      </span><span class="err">←</span><span class="w"> </span><span class="n">发布运行目录</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="p">.</span><span class="n">exe</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetCommandLineTool</span><span class="p">.</span><span class="n">exe</span><span class="w">      </span><span class="err">←</span><span class="w"> </span><span class="n">命令行工具</span><span class="err">（</span><span class="n">V2</span><span class="mf">.0.0</span><span class="w"> </span><span class="n">起随附</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetProductWizard</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">plugins</span><span class="o">/</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="n">运行时插件目录</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetLicensePlugin</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetUpdatePlugin</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetLogManagerPlugin</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetProgressPlugin</span><span class="p">.</span><span class="n">dll</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetCANPlugin</span><span class="p">.</span><span class="n">dll</span><span class="w">        </span><span class="err">←</span><span class="w"> </span><span class="n">CAN</span><span class="w"> </span><span class="n">报文收发插件</span><span class="err">（</span><span class="n">CetCANInterface</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetPlugins</span><span class="p">.</span><span class="n">ini</span><span class="w">          </span><span class="err">←</span><span class="w"> </span><span class="n">更新服务地址配置</span><span class="err">（</span><span class="o">[</span><span class="n">CetWebs</span><span class="o">]</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">purchase</span><span class="p">.</span><span class="n">html</span><span class="w">           </span><span class="err">←</span><span class="w"> </span><span class="n">购买</span><span class="o">/</span><span class="n">激活提示页</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">Qt5</span><span class="o">*</span><span class="p">.</span><span class="n">dll</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">lib</span><span class="o">*</span><span class="p">.</span><span class="n">dll</span><span class="w">         </span><span class="err">←</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">运行时依赖</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">translations</span><span class="o">/</span><span class="w">               </span><span class="err">←</span><span class="w"> </span><span class="n">Qt</span><span class="w"> </span><span class="n">内置翻译</span><span class="err">（</span><span class="n">qt_</span><span class="o">*</span><span class="p">.</span><span class="n">qm</span><span class="err">）</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">LICENSE</span><span class="o">/</span><span class="w">                    </span><span class="err">←</span><span class="w"> </span><span class="n">授权文件目录</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">-</span><span class="n">Setup</span><span class="o">/</span><span class="w">        </span><span class="err">←</span><span class="w"> </span><span class="n">安装包工程</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="p">.</span><span class="n">iss</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">Inno</span><span class="w"> </span><span class="n">Setup</span><span class="w"> </span><span class="n">脚本</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="k">Output</span><span class="o">/</span><span class="w">                     </span><span class="err">←</span><span class="w"> </span><span class="n">生成的安装包</span><span class="w"> </span><span class="p">.</span><span class="n">exe</span>
+<span class="err">└──</span><span class="w"> </span><span class="n">CetDevelopmentKit</span><span class="o">-</span><span class="n">Patch</span><span class="o">/</span><span class="w">        </span><span class="err">←</span><span class="w"> </span><span class="n">补丁包目录</span>
 </code></pre></div></div>
 
 <hr />
@@ -501,16 +506,16 @@ body {
 </code></pre></div></div>
 
 <p><strong>进程通信流程</strong>：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>点击执行按钮
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>点击处理按钮
     → 调用当前模块 startCommand() 获取命令行
     → QProcess::start(program, arguments)
     → readyReadStandardOutput → 追加到日志区 + 调用模块 recvHandle(data)
     → readyReadStandardError  → 追加到日志区
-    → finished → 设置进度条 100%，关闭进程
+    → finished（正常退出）→ 设置进度条 100%，关闭进程
 </code></pre></div></div>
 
 <h3>4.2 CetToolPluginContext（插件上下文管理器）</h3>
-<p><strong>文件</strong>：<code>mainwindow/cettoolplugincontext.h</code>（声明），实现位于 <code>CetToolDLLs/CetToolDLLs/</code></p>
+<p><strong>文件</strong>：<code>mainwindow/cettoolplugincontext.h</code>（声明），实现位于 <code>CetToolDLLs/CetToolLibs/CetProductWizard/cettoolplugincontext.cpp</code></p>
 <p><code>CetToolPluginContext</code> 是 V2.5.0 引入的插件管理中枢，将原先分散在 <code>MainWindow</code> 中的插件加载、激活时序、更新检测等逻辑集中封装。</p>
 <p><strong>职责</strong>：</p>
 <table>
@@ -527,7 +532,7 @@ body {
 </tr>
 <tr>
 <td>完整性校验</td>
-<td>构造时对 <code>CetProductWizard.dll</code> 做 SHA256 哈希校验</td>
+<td>对 <code>CetProductWizard.dll</code> 做自完整性校验，并对各 Cet 插件 DLL 做 SHA256 校验</td>
 </tr>
 <tr>
 <td>功能初始化</td>
@@ -768,34 +773,46 @@ body {
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>注：<code>plugins/</code> 目录中的 <code>CetCANPlugin.dll</code>（CAN 报文收发，IID <code>org.qter.plugin.CetCANInterface</code>）不在上表四个接口之列，主程序 <code>CetToolPluginContext</code> 不会加载它。</p>
+</blockquote>
 <h3>5.3 插件完整性校验</h3>
-<p><code>CetToolPluginContext</code> 构造时执行自完整性检查：</p>
-<ul>
-<li>对 <code>CetProductWizard.dll</code> 做 SHA256 哈希计算</li>
-<li>与编译时嵌入的 <code>HASH_CetProductWizard_DLL</code>（定义在 <code>cettooldlls_hashes.h</code>）比对</li>
-<li>校验失败则记录错误，防止 DLL 被替换或篡改</li>
-</ul>
+<p><code>CetToolPluginContext</code> 采用两层 SHA256 完整性校验，期望哈希值均由 <code>cettooldlls_hashes.h</code> 在编译时嵌入：</p>
+<ol>
+<li><strong>自完整性检查</strong>（构造函数 <code>selfIntegrityCheck()</code>）：</li>
+<li>对 <code>CetProductWizard.dll</code> 计算 SHA256，与 <code>HASH_CetProductWizard_DLL</code> 比对</li>
+<li>校验失败会弹出"安全警告"并 <code>qFatal()</code> 终止程序，防止 DLL 被替换或篡改</li>
+<li>传入空哈希（开发/调试版本）时跳过校验</li>
+<li><strong>插件完整性检查</strong>（<code>loadPlugin()</code> 内的 <code>checkPluginIntegrity()</code>）：</li>
+<li>对 <code>CetLicensePlugin.dll</code>、<code>CetUpdatePlugin.dll</code>、<code>CetProgressPlugin.dll</code> 分别计算 SHA256，与 <code>HASH_CetLicensePlugin_DLL</code> / <code>HASH_CetUpdatePlugin_DLL</code> / <code>HASH_CetProgressPlugin_DLL</code> 比对</li>
+<li>校验失败则拒绝加载并弹出"安全警告"，错误信息经 <code>errInfo</code> 参数返回</li>
+<li>未列入上述校验名单的插件不做校验</li>
+</ol>
 <h3>5.4 授权激活系统</h3>
-<p>激活以 <code>PRODUCT_NAME</code>（= <code>APP_NAME</code> + 主版本号 + 次版本号 + <code>"0"</code>，如 <code>CetDevelopmentKit250</code>）作为产品唯一标识，绑定设备固钥（<code>solidKey()</code>）。</p>
+<p>激活以 <code>PRODUCT_NAME</code>（= <code>APP_NAME</code> + 主版本号 + 次版本号 + <code>"0"</code>，如 <code>CetDevelopmentKit260</code>）作为产品唯一标识，绑定设备固钥（<code>solidKey()</code>）。</p>
 <p><strong>V2.5.0 许可 3.0 新特性</strong>：
 - <strong>Ed25519 签名验证</strong>：许可文件采用 Ed25519 算法签名，公钥内嵌于 <code>CetLicensePlugin.dll</code>
 - <strong>SHA256 校验</strong>：插件自身支持 SHA256 完整性校验
 - <strong>临时授权</strong>：支持临时授权模式
-- <strong>停用/拒绝状态</strong>：授权被停用或拒绝后自动停止重试</p>
-<p><strong>自动激活时序</strong>：</p>
+- <strong>停用/拒绝状态</strong>：授权被停用或拒绝时进入拒绝状态，界面显示到期信息</p>
+<p><strong>自动激活时序</strong>（由 <code>CetToolPluginContext::initFeatures()</code> 实现）：</p>
 <div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>程序启动
-    └─ 10秒后 → 首次自动激活
-         ├─ 激活成功：主界面启用，标题栏恢复正常
-         ├─ 激活失败：主界面禁用，标题栏显示到期信息和固钥
-         └─ 30分钟后 → 再次激活（间隔时间每次翻倍：30→60→120→...分钟）
-              └─ 若授权被拒绝 → 停止重试
+    └─ 30秒后 → 首次自动激活（QTimer::singleShot(30 * 1000)）
+         ├─ 激活成功：主界面启用，标题栏恢复版本标题
+         ├─ 激活失败：主界面禁用，标题栏/状态栏显示到期信息和固钥
+         └─ 每次激活尝试后都会重新排程下一次（取消也继续重试）
+              └─ 间隔从 10 分钟起指数递增：10→20→40→80→… 分钟
+                    └─ 超过 24 小时则重置回 10 分钟
 
 用户手动激活：菜单栏 → [许可] → [激活]（弹出激活窗口）
 </code></pre></div></div>
 
+<blockquote>
+<p>试用提醒（V2.5.1 起）：启动 3 秒后读取 <code>Configs/ProductWizard.ini</code>，当 <code>Configure/Type == 2</code>（全功能版用户）时，由 <code>TrialReminder</code> 检查试用期并提醒（由 <code>ENABLE_TRIAL_REMINDER</code> 编译开关控制）。</p>
+</blockquote>
 <hr />
 <h2>六、版本号系统</h2>
-<p>版本号在 <code>version.h</code> 中集中管理，两种模式：</p>
+<p>版本号在 <code>version.h</code> 中集中管理，两种模式（当前为补丁版，<code>IS_RELEASE_VERSION=0</code>）：</p>
 <table>
 <thead>
 <tr>
@@ -807,22 +824,22 @@ body {
 <tbody>
 <tr>
 <td><code>APP_VERSION</code></td>
-<td><code>2.5.0</code></td>
-<td><code>2.5.0.7152</code></td>
+<td><code>2.6.0</code></td>
+<td><code>2.6.0.8281</code></td>
 </tr>
 <tr>
 <td><code>TIP_VERSION</code></td>
-<td><code>(CXYQK5152.CDPK250.G716)</code></td>
-<td><code>(CXYQK5152.CDPK250.G716) Patch-7152</code></td>
+<td><code>(CXYQK5152.CDPK260.G832)</code></td>
+<td><code>(CXYQK5152.CDPK260.G832) Patch-8281</code></td>
 </tr>
 <tr>
 <td><code>PRODUCT_NAME</code></td>
-<td><code>CetDevelopmentKit250</code></td>
-<td><code>CetDevelopmentKit250</code></td>
+<td><code>CetDevelopmentKit260</code></td>
+<td><code>CetDevelopmentKit260</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>版本编码说明</strong>（以 <code>CXYQK5152.CDPK250.G716</code> 为例）：</p>
+<p><strong>版本编码说明</strong>（以当前 <code>RELEASE_DATE</code> = <code>CXYQK5152.CDPK260.G832</code> 为例）：</p>
 <table>
 <thead>
 <tr>
@@ -836,12 +853,12 @@ body {
 <td>CetXiyuan Qt Kernel 5.15.2（Qt 版本）</td>
 </tr>
 <tr>
-<td><code>CDPK250</code></td>
-<td>CetDevelopmentKit 第 250 次构建</td>
+<td><code>CDPK260</code></td>
+<td>CetDevelopmentKit 第 260 次构建</td>
 </tr>
 <tr>
-<td><code>G716</code></td>
-<td>G=2026年（A=2020年起），7=7月，16编码为 16−7(月)=9 即 9日</td>
+<td><code>G832</code></td>
+<td>G=2026年（A=2020年起字母顺延），8=8月，32−8(月)=24 即 24 日</td>
 </tr>
 </tbody>
 </table>
@@ -889,7 +906,7 @@ body {
 </tr>
 <tr>
 <td><code>on_processHandleButton_clicked()</code></td>
-<td>点击"执行"按钮</td>
+<td>点击"处理"按钮</td>
 <td>关闭当前进程，根据当前模块生成命令并启动新进程</td>
 </tr>
 <tr>
@@ -1188,7 +1205,7 @@ body {
 <hr />
 <h2>八、关键数据流</h2>
 <h3>场景一：EC200U 差分包制作</h3>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="err">用户点击</span><span class="p">[</span><span class="err">执行</span><span class="p">]</span><span class="err">按钮</span>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="err">用户点击</span><span class="p">[</span><span class="err">处理</span><span class="p">]</span><span class="err">按钮</span>
 <span class="w">    </span><span class="err">│</span>
 <span class="w">    </span><span class="err">▼</span>
 <span class="n">on_processHandleButton_clicked</span><span class="p">()</span>
@@ -1215,7 +1232,7 @@ body {
 </code></pre></div></div>
 
 <h3>场景二：ADB 设备数据打包导出</h3>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>用户点击[执行]按钮
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>用户点击[处理]按钮
     │
     ▼
 on_processHandleButton_clicked()
@@ -1246,6 +1263,7 @@ adb pull 完成 → onProcessFinished()
 <span class="n">MainWindow</span><span class="w"> </span><span class="err">构造函数</span>
 <span class="w">    </span><span class="err">├─</span><span class="w"> </span><span class="err">创建</span><span class="w"> </span><span class="n">CetToolPluginContext</span><span class="p">(</span><span class="n">HASH_CetProductWizard_DLL</span><span class="p">)</span>
 <span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">└─</span><span class="w"> </span><span class="n">selfIntegrityCheck</span><span class="p">()</span><span class="err">：</span><span class="n">SHA256</span><span class="w"> </span><span class="err">校验</span><span class="w"> </span><span class="n">CetProductWizard</span><span class="o">.</span><span class="n">dll</span>
+<span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">└─</span><span class="w"> </span><span class="err">（</span><span class="n">loadPlugin</span><span class="w"> </span><span class="err">时另对</span><span class="w"> </span><span class="n">License</span><span class="o">/</span><span class="n">Update</span><span class="o">/</span><span class="n">Progress</span><span class="w"> </span><span class="err">插件做</span><span class="w"> </span><span class="n">SHA256</span><span class="w"> </span><span class="err">校验）</span>
 <span class="w">    </span><span class="err">├─</span><span class="w"> </span><span class="err">创建</span><span class="w"> </span><span class="n">QSettings</span><span class="err">、</span><span class="n">QProcess</span>
 <span class="w">    </span><span class="err">├─</span><span class="w"> </span><span class="err">初始化</span><span class="w"> </span><span class="n">UI</span><span class="err">、子模块</span>
 <span class="w">    </span><span class="err">│</span>
@@ -1258,11 +1276,11 @@ adb pull 完成 → onProcessFinished()
 <span class="w">    </span><span class="err">│</span>
 <span class="w">    </span><span class="err">▼</span>
 <span class="err">激活时序（由</span><span class="w"> </span><span class="n">CetToolPluginContext</span><span class="w"> </span><span class="err">内部管理）</span>
-<span class="w">    </span><span class="err">├─</span><span class="w"> </span><span class="err">首次激活：</span><span class="mi">10</span><span class="w"> </span><span class="err">秒后</span>
-<span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">├─</span><span class="w"> </span><span class="err">成功</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="err">启用</span><span class="w"> </span><span class="n">centralWidget</span><span class="err">，更新标题</span>
-<span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">├─</span><span class="w"> </span><span class="err">失败</span><span class="o">/</span><span class="err">取消</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="err">禁用</span><span class="w"> </span><span class="n">centralWidget</span><span class="err">，显示到期信息</span>
-<span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">└─</span><span class="w"> </span><span class="err">被拒绝</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="err">停止后续重试</span>
-<span class="w">    </span><span class="err">└─</span><span class="w"> </span><span class="err">重试：</span><span class="mi">30</span><span class="w"> </span><span class="err">分钟</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="err">分钟</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">120</span><span class="w"> </span><span class="err">分钟</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">(</span><span class="err">指数退避</span><span class="p">)</span>
+<span class="w">    </span><span class="err">├─</span><span class="w"> </span><span class="err">首次激活：</span><span class="mi">30</span><span class="w"> </span><span class="err">秒后</span>
+<span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">├─</span><span class="w"> </span><span class="err">成功</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="err">启用</span><span class="w"> </span><span class="n">centralWidget</span><span class="err">，恢复版本标题</span>
+<span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">├─</span><span class="w"> </span><span class="err">失败</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="err">禁用</span><span class="w"> </span><span class="n">centralWidget</span><span class="err">，标题栏</span><span class="o">/</span><span class="err">状态栏显示到期信息</span>
+<span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">└─</span><span class="w"> </span><span class="err">取消</span><span class="o">/</span><span class="err">失败后仍会重新排程下一次（不停止重试）</span>
+<span class="w">    </span><span class="err">└─</span><span class="w"> </span><span class="err">重试：</span><span class="mi">10</span><span class="w"> </span><span class="err">分钟</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="err">分钟</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">40</span><span class="w"> </span><span class="err">分钟</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">...</span><span class="err">（指数退避，</span><span class="o">&gt;</span><span class="mi">24</span><span class="n">h</span><span class="w"> </span><span class="err">重置回</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="err">分钟）</span>
 </code></pre></div></div>
 
 <hr />
@@ -1401,12 +1419,12 @@ adb pull 完成 → onProcessFinished()
 - 避免了多进程并发的资源竞争问题</p>
 <p><strong>代价</strong>：切换任务时必须先关闭当前进程（<code>m_cmdProcess-&gt;close()</code>），无法保留上一次任务的输出。</p>
 <h3>3. 指数退避激活策略</h3>
-<p><strong>决策</strong>：激活失败后采用指数退避重试（30 分钟 → 60 分钟 → 120 分钟 → ...），被拒绝则完全停止。</p>
+<p><strong>决策</strong>：激活失败后采用指数退避重试（10 分钟 → 20 分钟 → 40 分钟 → ...，超过 24 小时重置回 10 分钟），每次激活尝试后都会重新排程下一次。</p>
 <p><strong>理由</strong>：
 - 避免短时间频繁请求对服务器造成压力
-- 首次激活 10 秒延迟，给系统启动留出缓冲时间
+- 首次激活 30 秒延迟，给系统启动留出缓冲时间
 - 指数增长确保长期未激活时不会过于频繁地重试
-- 拒绝状态停止重试，避免无效请求</p>
+- 超过 24 小时后重置为 10 分钟，避免间隔无限增大导致长期不再尝试</p>
 <h3>4. QMake 优先，CMake 兼容</h3>
 <p><strong>决策</strong>：以 QMake 为主要构建系统，同时维护 CMakeLists.txt 作为备选。</p>
 <p><strong>理由</strong>：
@@ -1470,13 +1488,13 @@ adb pull 完成 → onProcessFinished()
 </tr>
 <tr>
 <td>插件完整性</td>
-<td>当前仅校验 CetProductWizard.dll</td>
-<td>扩展 <code>selfIntegrityCheck()</code> 支持校验其他 DLL</td>
+<td>当前校验 <code>CetProductWizard.dll</code> 及 <code>CetLicensePlugin</code> / <code>CetUpdatePlugin</code> / <code>CetProgressPlugin</code></td>
+<td>在 <code>checkPluginIntegrity()</code> 名单中增加 DLL，并更新 <code>cettooldlls_hashes.h</code> 中的哈希值</td>
 </tr>
 </tbody>
 </table>
     </div>
-    <div id="doc-footer">📄 文档转换 · 筆名 CetXiyuan</div>
+    <div id="doc-footer">📄 文档转换 · 笔名 CetXiyuan</div>
 </div>
 <div id="toast"></div>
 

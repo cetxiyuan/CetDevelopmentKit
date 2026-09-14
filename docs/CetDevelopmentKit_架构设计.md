@@ -5,7 +5,7 @@
 | 项目 | 说明 |
 |---|---|
 | 软件名称 | CetDevelopmentKit（Cet 开发集成工具包） |
-| 当前版本 | V2.5.0 |
+| 当前版本 | V2.6.0.8281 |
 | 技术栈 | Qt 5.15.2 / C++11 / MinGW 32-bit / Windows |
 | 作者 | CetXiyuan（笔名） |
 | 官网 | https://www.cetxiyuan.com/ |
@@ -94,7 +94,7 @@ graph TD
 3. **配置即时持久化**：用户输入字段变更时立即写入 `QSettings` INI 文件，无需手动保存（个别仅用于当次任务且每次必变的字段如输出文件名除外）。
 4. **HiDPI 自适应**：`main.cpp` 启动时启用 `AA_EnableHighDpiScaling` + `PassThrough` 舍入策略，确保高分辨率屏幕正确缩放。
 5. **跨平台风格一致**：通过 `QStyleFactory::create(list.last())` 选取系统最终可用风格（通常为 Fusion），保证 UI 外观统一。
-6. **插件完整性校验**：`CetToolPluginContext` 构造时通过 `selfIntegrityCheck()` 对 `CetProductWizard.dll` 做 SHA256 哈希校验，防止 DLL 被替换。
+6. **插件完整性校验**：`CetToolPluginContext` 对自身 `CetProductWizard.dll` 做自完整性校验，并对 `CetLicensePlugin` / `CetUpdatePlugin` / `CetProgressPlugin` 做 SHA256 哈希校验，防止 DLL 被替换（详见 5.3）。
 
 ---
 
@@ -141,8 +141,11 @@ CetDevelopmentKit/                  ← 仓库根目录
 │   │   ├── CetUpdatePlugin.dll
 │   │   ├── CetLogManagerPlugin.dll
 │   │   ├── CetProgressPlugin.dll
-│   │   └── CetPlugins.ini
+│   │   ├── CetCANPlugin.dll        ← CAN 报文收发插件（CetCANInterface）
+│   │   ├── CetPlugins.ini          ← 更新服务地址配置（[CetWebs]）
+│   │   └── purchase.html           ← 购买/激活提示页
 │   ├── Qt5*.dll / lib*.dll         ← Qt 运行时依赖
+│   ├── translations/               ← Qt 内置翻译（qt_*.qm）
 │   └── LICENSE/                    ← 授权文件目录
 ├── CetDevelopmentKit-Setup/        ← 安装包工程
 │   ├── CetDevelopmentKit.iss       ← Inno Setup 脚本
@@ -182,17 +185,17 @@ ComboBox 选择 → doCurrentIndexChanged()
 **进程通信流程**：
 
 ```
-点击执行按钮
+点击处理按钮
     → 调用当前模块 startCommand() 获取命令行
     → QProcess::start(program, arguments)
     → readyReadStandardOutput → 追加到日志区 + 调用模块 recvHandle(data)
     → readyReadStandardError  → 追加到日志区
-    → finished → 设置进度条 100%，关闭进程
+    → finished（正常退出）→ 设置进度条 100%，关闭进程
 ```
 
 ### 4.2 CetToolPluginContext（插件上下文管理器）
 
-**文件**：`mainwindow/cettoolplugincontext.h`（声明），实现位于 `CetToolDLLs/CetToolDLLs/`
+**文件**：`mainwindow/cettoolplugincontext.h`（声明），实现位于 `CetToolDLLs/CetToolLibs/CetProductWizard/cettoolplugincontext.cpp`
 
 `CetToolPluginContext` 是 V2.5.0 引入的插件管理中枢，将原先分散在 `MainWindow` 中的插件加载、激活时序、更新检测等逻辑集中封装。
 
@@ -201,7 +204,7 @@ ComboBox 选择 → doCurrentIndexChanged()
 | 职责 | 说明 |
 |---|---|
 | 插件加载 | 统一从指定路径加载 `.dll` 插件，支持完整性校验 |
-| 完整性校验 | 构造时对 `CetProductWizard.dll` 做 SHA256 哈希校验 |
+| 完整性校验 | 对 `CetProductWizard.dll` 做自完整性校验，并对各 Cet 插件 DLL 做 SHA256 校验 |
 | 功能初始化 | `initFeatures()` 一次性完成所有插件的加载和激活时序设置 |
 | 接口访问 | 通过 `logManager()`、`license()`、`updater()`、`progress()` 访问器获取插件接口 |
 
@@ -314,56 +317,66 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 | `CetLogManagerInterface` | `org.qter.plugin.CetLogManagerInterface` | `CetLogManagerPlugin.dll` | 构造时加载，不显示警告 |
 | `CetProgressInterface` | `org.qter.plugin.CetProgressInterface` | `CetProgressPlugin.dll` | 静默忽略 |
 
+> 注：`plugins/` 目录中的 `CetCANPlugin.dll`（CAN 报文收发，IID `org.qter.plugin.CetCANInterface`）不在上表四个接口之列，主程序 `CetToolPluginContext` 不会加载它。
+
 ### 5.3 插件完整性校验
 
-`CetToolPluginContext` 构造时执行自完整性检查：
+`CetToolPluginContext` 采用两层 SHA256 完整性校验，期望哈希值均由 `cettooldlls_hashes.h` 在编译时嵌入：
 
-- 对 `CetProductWizard.dll` 做 SHA256 哈希计算
-- 与编译时嵌入的 `HASH_CetProductWizard_DLL`（定义在 `cettooldlls_hashes.h`）比对
-- 校验失败则记录错误，防止 DLL 被替换或篡改
+1. **自完整性检查**（构造函数 `selfIntegrityCheck()`）：
+   - 对 `CetProductWizard.dll` 计算 SHA256，与 `HASH_CetProductWizard_DLL` 比对
+   - 校验失败会弹出"安全警告"并 `qFatal()` 终止程序，防止 DLL 被替换或篡改
+   - 传入空哈希（开发/调试版本）时跳过校验
+2. **插件完整性检查**（`loadPlugin()` 内的 `checkPluginIntegrity()`）：
+   - 对 `CetLicensePlugin.dll`、`CetUpdatePlugin.dll`、`CetProgressPlugin.dll` 分别计算 SHA256，与 `HASH_CetLicensePlugin_DLL` / `HASH_CetUpdatePlugin_DLL` / `HASH_CetProgressPlugin_DLL` 比对
+   - 校验失败则拒绝加载并弹出"安全警告"，错误信息经 `errInfo` 参数返回
+   - 未列入上述校验名单的插件不做校验
 
 ### 5.4 授权激活系统
 
-激活以 `PRODUCT_NAME`（= `APP_NAME` + 主版本号 + 次版本号 + `"0"`，如 `CetDevelopmentKit250`）作为产品唯一标识，绑定设备固钥（`solidKey()`）。
+激活以 `PRODUCT_NAME`（= `APP_NAME` + 主版本号 + 次版本号 + `"0"`，如 `CetDevelopmentKit260`）作为产品唯一标识，绑定设备固钥（`solidKey()`）。
 
 **V2.5.0 许可 3.0 新特性**：
 - **Ed25519 签名验证**：许可文件采用 Ed25519 算法签名，公钥内嵌于 `CetLicensePlugin.dll`
 - **SHA256 校验**：插件自身支持 SHA256 完整性校验
 - **临时授权**：支持临时授权模式
-- **停用/拒绝状态**：授权被停用或拒绝后自动停止重试
+- **停用/拒绝状态**：授权被停用或拒绝时进入拒绝状态，界面显示到期信息
 
-**自动激活时序**：
+**自动激活时序**（由 `CetToolPluginContext::initFeatures()` 实现）：
 
 ```
 程序启动
-    └─ 10秒后 → 首次自动激活
-         ├─ 激活成功：主界面启用，标题栏恢复正常
-         ├─ 激活失败：主界面禁用，标题栏显示到期信息和固钥
-         └─ 30分钟后 → 再次激活（间隔时间每次翻倍：30→60→120→...分钟）
-              └─ 若授权被拒绝 → 停止重试
+    └─ 30秒后 → 首次自动激活（QTimer::singleShot(30 * 1000)）
+         ├─ 激活成功：主界面启用，标题栏恢复版本标题
+         ├─ 激活失败：主界面禁用，标题栏/状态栏显示到期信息和固钥
+         └─ 每次激活尝试后都会重新排程下一次（取消也继续重试）
+              └─ 间隔从 10 分钟起指数递增：10→20→40→80→… 分钟
+                    └─ 超过 24 小时则重置回 10 分钟
 
 用户手动激活：菜单栏 → [许可] → [激活]（弹出激活窗口）
 ```
+
+> 试用提醒（V2.5.1 起）：启动 3 秒后读取 `Configs/ProductWizard.ini`，当 `Configure/Type == 2`（全功能版用户）时，由 `TrialReminder` 检查试用期并提醒（由 `ENABLE_TRIAL_REMINDER` 编译开关控制）。
 
 ---
 
 ## 六、版本号系统
 
-版本号在 `version.h` 中集中管理，两种模式：
+版本号在 `version.h` 中集中管理，两种模式（当前为补丁版，`IS_RELEASE_VERSION=0`）：
 
 | 宏 | 正式版（IS_RELEASE_VERSION=1） | 补丁版（IS_RELEASE_VERSION=0） |
 |---|---|---|
-| `APP_VERSION` | `2.5.0` | `2.5.0.7152` |
-| `TIP_VERSION` | `(CXYQK5152.CDPK250.G716)` | `(CXYQK5152.CDPK250.G716) Patch-7152` |
-| `PRODUCT_NAME` | `CetDevelopmentKit250` | `CetDevelopmentKit250` |
+| `APP_VERSION` | `2.6.0` | `2.6.0.8281` |
+| `TIP_VERSION` | `(CXYQK5152.CDPK260.G832)` | `(CXYQK5152.CDPK260.G832) Patch-8281` |
+| `PRODUCT_NAME` | `CetDevelopmentKit260` | `CetDevelopmentKit260` |
 
-**版本编码说明**（以 `CXYQK5152.CDPK250.G716` 为例）：
+**版本编码说明**（以当前 `RELEASE_DATE` = `CXYQK5152.CDPK260.G832` 为例）：
 
 | 段 | 含义 |
 |---|---|
 | `CXYQK5152` | CetXiyuan Qt Kernel 5.15.2（Qt 版本） |
-| `CDPK250` | CetDevelopmentKit 第 250 次构建 |
-| `G716` | G=2026年（A=2020年起），7=7月，16编码为 16−7(月)=9 即 9日 |
+| `CDPK260` | CetDevelopmentKit 第 260 次构建 |
+| `G832` | G=2026年（A=2020年起字母顺延），8=8月，32−8(月)=24 即 24 日 |
 
 ---
 
@@ -386,7 +399,7 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 | 信号/槽 | 触发时机 | 说明 |
 |---------|---------|------|
 | `onProcessFinished(int, QProcess::ExitStatus)` | QProcess 结束时 | 正常退出时置进度条 100%，关闭进程 |
-| `on_processHandleButton_clicked()` | 点击"执行"按钮 | 关闭当前进程，根据当前模块生成命令并启动新进程 |
+| `on_processHandleButton_clicked()` | 点击"处理"按钮 | 关闭当前进程，根据当前模块生成命令并启动新进程 |
 | `on_processConfigureButton_clicked()` | 点击"配置"按钮 | 折叠/展开配置面板 |
 | lambda: readyReadStandardOutput | 进程有标准输出时 | 读取数据 → 显示到日志区 → 路由到当前模块的 recvHandle() |
 | lambda: readyReadStandardError | 进程有标准错误时 | 读取数据 → 显示到日志区 |
@@ -504,7 +517,7 @@ startCommand() → 执行 adb shell（启动交互式 Shell）
 ### 场景一：EC200U 差分包制作
 
 ```
-用户点击[执行]按钮
+用户点击[处理]按钮
     │
     ▼
 on_processHandleButton_clicked()
@@ -533,7 +546,7 @@ on_processHandleButton_clicked()
 ### 场景二：ADB 设备数据打包导出
 
 ```
-用户点击[执行]按钮
+用户点击[处理]按钮
     │
     ▼
 on_processHandleButton_clicked()
@@ -566,6 +579,7 @@ adb pull 完成 → onProcessFinished()
 MainWindow 构造函数
     ├─ 创建 CetToolPluginContext(HASH_CetProductWizard_DLL)
     │   └─ selfIntegrityCheck()：SHA256 校验 CetProductWizard.dll
+    │   └─ （loadPlugin 时另对 License/Update/Progress 插件做 SHA256 校验）
     ├─ 创建 QSettings、QProcess
     ├─ 初始化 UI、子模块
     │
@@ -578,11 +592,11 @@ m_toolPluginCtx->initFeatures()
     │
     ▼
 激活时序（由 CetToolPluginContext 内部管理）
-    ├─ 首次激活：10 秒后
-    │   ├─ 成功 → 启用 centralWidget，更新标题
-    │   ├─ 失败/取消 → 禁用 centralWidget，显示到期信息
-    │   └─ 被拒绝 → 停止后续重试
-    └─ 重试：30 分钟 → 60 分钟 → 120 分钟 → ... (指数退避)
+    ├─ 首次激活：30 秒后
+    │   ├─ 成功 → 启用 centralWidget，恢复版本标题
+    │   ├─ 失败 → 禁用 centralWidget，标题栏/状态栏显示到期信息
+    │   └─ 取消/失败后仍会重新排程下一次（不停止重试）
+    └─ 重试：10 分钟 → 20 分钟 → 40 分钟 → ...（指数退避，>24h 重置回 10 分钟）
 ```
 
 ---
@@ -665,13 +679,13 @@ main.cpp
 
 ### 3. 指数退避激活策略
 
-**决策**：激活失败后采用指数退避重试（30 分钟 → 60 分钟 → 120 分钟 → ...），被拒绝则完全停止。
+**决策**：激活失败后采用指数退避重试（10 分钟 → 20 分钟 → 40 分钟 → ...，超过 24 小时重置回 10 分钟），每次激活尝试后都会重新排程下一次。
 
 **理由**：
 - 避免短时间频繁请求对服务器造成压力
-- 首次激活 10 秒延迟，给系统启动留出缓冲时间
+- 首次激活 30 秒延迟，给系统启动留出缓冲时间
 - 指数增长确保长期未激活时不会过于频繁地重试
-- 拒绝状态停止重试，避免无效请求
+- 超过 24 小时后重置为 10 分钟，避免间隔无限增大导致长期不再尝试
 
 ### 4. QMake 优先，CMake 兼容
 
@@ -715,4 +729,4 @@ main.cpp
 | 扩展 ADB 状态机 | 增加新的 Shell 交互步骤 | 在 `ADBConfigure::recvHandle()` 的 switch 中添加新 case |
 | 支持更多构建套件 | 当前仅支持 MinGW 32-bit | 修改 `.pro` 文件的条件编译宏，添加对应套件的库路径 |
 | 国际化 | 当前使用 `tr()` 但仅支持中文 | 添加 `.ts` 翻译文件，使用 Qt Linguist 工具链 |
-| 插件完整性 | 当前仅校验 CetProductWizard.dll | 扩展 `selfIntegrityCheck()` 支持校验其他 DLL |
+| 插件完整性 | 当前校验 `CetProductWizard.dll` 及 `CetLicensePlugin` / `CetUpdatePlugin` / `CetProgressPlugin` | 在 `checkPluginIntegrity()` 名单中增加 DLL，并更新 `cettooldlls_hashes.h` 中的哈希值 |

@@ -6,12 +6,14 @@
 <title>CetDevelopmentKit 维护者指南</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/shell.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
 <style>
@@ -355,7 +357,7 @@ body {
 <ul>
 <li>使用 <strong>4 个空格</strong> 缩进（不使用 Tab）</li>
 <li>左大括号不换行（K&amp;R 风格）</li>
-<li>条件/循环必须使用大括号（即使单行语句）</li>
+<li>条件/循环建议使用大括号；现有代码中单行 <code>if</code> 也存在省略大括号的写法（如 <code>if (!toolPath.isEmpty()) ui-&gt;toolPathLineEdit-&gt;setText(toolPath);</code>）</li>
 </ul>
 <div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1">// 正确</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">condition</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -505,7 +507,7 @@ Modified: 许可证激活定时器重构为可复用 QTimer
 <tbody>
 <tr>
 <td>首次启动（无配置文件）</td>
-<td>正常启动，10 秒后触发激活</td>
+<td>正常启动，30 秒后触发激活</td>
 </tr>
 <tr>
 <td>已激活状态启动</td>
@@ -525,7 +527,7 @@ Modified: 许可证激活定时器重构为可复用 QTimer
 </tr>
 <tr>
 <td>DLL 完整性校验</td>
-<td>CetProductWizard.dll 哈希匹配，校验通过</td>
+<td>CetProductWizard.dll 及各 Cet 插件 DLL 哈希匹配，校验通过</td>
 </tr>
 </tbody>
 </table>
@@ -622,19 +624,19 @@ Modified: 许可证激活定时器重构为可复用 QTimer
 <h3>1. 更新版本号</h3>
 <p>编辑 <code>CetDevelopmentKit/version.h</code>:</p>
 <div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="cp">#define VER_MAJOR               2</span>
-<span class="cp">#define VER_MINOR               5</span>
+<span class="cp">#define VER_MINOR               6</span>
 <span class="cp">#define VER_MICRO               0</span>
-<span class="cp">#define RELEASE_DATE            &quot;(CXYQK5152.CDPK250.G716)&quot;</span>
+<span class="cp">#define RELEASE_DATE            &quot;(CXYQK5152.CDPK260.G832)&quot;</span>
 <span class="cp">#define IS_RELEASE_VERSION      ( 1 )</span>
 </code></pre></div></div>
 
 <h3>2. 更新安装脚本</h3>
 <p>编辑 <code>CetDevelopmentKit-Setup/CetDevelopmentKit.iss</code>:</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>#define MyAppVersion &quot;2.5.0&quot;
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>#define MyAppVersion &quot;2.6.0&quot;
 </code></pre></div></div>
 
 <h3>3. 更新 CHANGELOG.md</h3>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="gu">## [2.5.0] - 2026-07-09</span>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="gu">## [2.6.0] - 2026-08-24</span>
 
 <span class="gu">### 新增</span>
 <span class="k">-</span><span class="w"> </span>xxx
@@ -662,8 +664,8 @@ mkdir<span class="w"> </span>plugins
 <p>在 Inno Setup 中打开 <code>CetDevelopmentKit.iss</code>，点击 Build → Compile。</p>
 <h3>7. 提交并打标签</h3>
 <div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>CetDevelopmentKit/version.h<span class="w"> </span>CetDevelopmentKit-Setup/CetDevelopmentKit.iss<span class="w"> </span>CHANGELOG.md
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;发布正式版 V2.5.0&quot;</span>
-git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v2.5.0<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Release V2.5.0&quot;</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;发布正式版 V2.6.0&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v2.6.0<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Release V2.6.0&quot;</span>
 git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>master<span class="w"> </span>--tags
 </code></pre></div></div>
 
@@ -815,10 +817,13 @@ CONFIG   += c++11
 # 插件 DLL 名称
 TARGET = CetMyPlugin
 
-# 引入主工程的接口头文件
+# 引入主工程的接口头文件（也可在插件目录内保留一份接口头文件副本）
 INCLUDEPATH += ../../../CetDevelopmentKit/CetDevelopmentKit/interfaces
 </code></pre></div></div>
 
+<blockquote>
+<p>实际约定：<code>CetUpdatePlugin</code> / <code>CetLogManagerPlugin</code> / <code>CetProgressPlugin</code> 等在每个插件目录内各自保留一份接口头文件副本；<code>CetLicensePlugin</code> 则从 <code>CetToolLicense</code> 仓库（<code>$$PWD/../../../CetToolLicense/CetToolLicense</code>）引入许可相关头文件。</p>
+</blockquote>
 <h4>步骤 3：实现插件类</h4>
 <div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1">// cetmyplugin.h</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QObject&gt;</span>
@@ -854,7 +859,7 @@ INCLUDEPATH += ../../../CetDevelopmentKit/CetDevelopmentKit/interfaces
 <h4>步骤 4：在主程序中加载使用</h4>
 <p>由于 V2.5.0 起插件通过 <code>CetToolPluginContext</code> 管理，有两种方式：</p>
 <p><strong>方式一（推荐）：扩展 CetToolPluginContext</strong></p>
-<p>在 <code>CetToolDLLs/CetToolDLLs/</code> 的 <code>CetToolPluginContext</code> 实现中添加新接口的加载逻辑。</p>
+<p>在 <code>CetToolDLLs/CetToolLibs/CetProductWizard/cettoolplugincontext.cpp</code> 的 <code>CetToolPluginContext</code> 实现中添加新接口的加载逻辑。</p>
 <p><strong>方式二：在 MainWindow 中直接调用</strong></p>
 <div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1">// 通过 CetToolPluginContext 的 loadPlugin 方法</span>
 <span class="n">QObject</span><span class="w"> </span><span class="o">*</span><span class="n">plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_toolPluginCtx</span><span class="o">-&gt;</span><span class="n">loadPlugin</span><span class="p">(</span><span class="s">&quot;CetMyPlugin.dll&quot;</span><span class="p">);</span>
@@ -893,7 +898,7 @@ INCLUDEPATH += ../../../CetDevelopmentKit/CetDevelopmentKit/interfaces
 </tr>
 <tr>
 <td>插件父对象</td>
-<td><code>loadPlugin()</code> 会自动将插件实例的 parent 设为 <code>CetToolPluginContext</code>，插件无需自行管理生命周期</td>
+<td><code>loadPlugin()</code> 对 QWidget 类插件将其 parent 设为主窗口（<code>parentWidget()</code>），其余插件则设为 <code>CetToolPluginContext</code> 自身，插件无需自行管理生命周期</td>
 </tr>
 <tr>
 <td>完整性校验</td>
@@ -935,6 +940,9 @@ INCLUDEPATH += ../../../CetDevelopmentKit/CetDevelopmentKit/interfaces
 <span class="p">}</span>
 </code></pre></div></div>
 
+<blockquote>
+<p>注意：源码中 EC200U 模块的 <code>outputName</code> <strong>有意不做持久化</strong>（每次任务文件名不同，见《架构设计》4.3），上面的"恢复配置/保存槽"仅为演示"新增一个配置项"的通用流程，并非该模块的实际实现。</p>
+</blockquote>
 <h3>场景二：修改接收缓存大小</h3>
 <p>ADB 接收处理通过 <code>QProcess::readyReadStandardOutput</code> 信号驱动，数据由 <code>readAllStandardOutput()</code> 读取。如需调整缓存行为：</p>
 <p><strong>修改 <code>mainwindow.cpp</code> 中的 lambda</strong>:</p>
@@ -968,14 +976,16 @@ INCLUDEPATH += ../../../CetDevelopmentKit/CetDevelopmentKit/interfaces
 
 <h3>场景三：修改许可证激活时间间隔</h3>
 <p>修改 <code>CetToolPluginContext</code> 实现中的定时器设置（代码位于 <code>CetToolDLLs</code> 仓库）：</p>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1">// 首次激活延迟（默认 10 秒）</span>
-<span class="n">QTimer</span><span class="o">::</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="o">=</span><span class="p">]()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="c1">// 首次激活延迟（默认 30 秒）</span>
+<span class="n">QTimer</span><span class="o">::</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">30</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="o">=</span><span class="p">]()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
 
-<span class="c1">// 重试间隔初值（默认 30 分钟）</span>
-<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">auto_timing_msec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span>
+<span class="c1">// 重试间隔初值（默认 10 分钟）</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">auto_timing_msec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span>
 
-<span class="c1">// 指数退避倍数（默认 2 倍）</span>
+<span class="c1">// 指数退避倍数（默认 2 倍），超过 24 小时重置回 10 分钟</span>
 <span class="n">auto_timing_msec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">auto_timing_msec</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">auto_timing_msec</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">24</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">)</span>
+<span class="w">    </span><span class="n">auto_timing_msec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h3>场景四：修改 QSettings 配置文件路径</h3>
@@ -1070,7 +1080,7 @@ INCLUDEPATH += ../../../CetDevelopmentKit/CetDevelopmentKit/interfaces
 <p><strong>注意</strong>: <code>CetToolPluginContext</code> 的 <code>.cpp</code> 实现位于 <code>CetToolDLLs</code> 仓库（<code>F:\sharefolder\cetqtlearn\CetToolDLLs\</code>），通过 <code>CetDevelopmentKit.pro</code> 中的 <code>INCLUDEPATH += $$PWD/../../CetToolDLLs</code> 引入。</p>
 </blockquote>
     </div>
-    <div id="doc-footer">📄 文档转换 · 筆名 CetXiyuan</div>
+    <div id="doc-footer">📄 文档转换 · 笔名 CetXiyuan</div>
 </div>
 <div id="toast"></div>
 

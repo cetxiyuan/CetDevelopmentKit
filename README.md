@@ -1,4 +1,4 @@
-# CetDevelopmentKit V2.5.0
+# CetDevelopmentKit V2.6.0
 
 基于 Qt 5.15.2 (MinGW 32-bit) 的 Windows 桌面开发集成工具包，归属 CetXiyuan。
 

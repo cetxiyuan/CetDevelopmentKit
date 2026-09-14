@@ -2,26 +2,26 @@
 
 ## 一、版本信息
 
-**当前版本**: V2.5.0
+**当前版本**: V2.6.0.8281
 
 ### 版本号
 
 | 宏 | 值 | 说明 |
 |----|-----|------|
 | `VER_MAJOR` | 2 | 主版本号 |
-| `VER_MINOR` | 5 | 次版本号 |
+| `VER_MINOR` | 6 | 次版本号 |
 | `VER_MICRO` | 0 | 小版本号 |
 | `IS_RELEASE_VERSION` | 0 | 是否为正式版（1=正式版，0=补丁版） |
-| `APP_VERSION` | `"2.5.0.7152"` | 应用版本字符串（补丁版） |
-| `TIP_VERSION` | `"(CXYQK5152.CDPK250.G716) Patch-7152"` | 版本提示字符串（补丁版） |
-| `PATCH_PACKET` | `"7152"` | 补丁包号 |
+| `APP_VERSION` | `"2.6.0.8281"` | 应用版本字符串（补丁版） |
+| `TIP_VERSION` | `"(CXYQK5152.CDPK260.G832) Patch-8281"` | 版本提示字符串（补丁版） |
+| `PATCH_PACKET` | `"8281"` | 补丁包号 |
 
 ### 产品信息
 
 | 宏 | 值 | 说明 |
 |----|-----|------|
 | `APP_NAME` | `"CetDevelopmentKit"` | 应用名称 |
-| `PRODUCT_NAME` | `"CetDevelopmentKit250"` | 产品 ID（= APP_NAME + 主版本号 + 次版本号 + "0"） |
+| `PRODUCT_NAME` | `"CetDevelopmentKit260"` | 产品 ID（= APP_NAME + 主版本号 + 次版本号 + "0"） |
 | `COMPANY_NAME` | `"CetXiyuan"` | 公司名称 |
 | `PRODUCT_ICON` | `"favorite.ico"` | 应用图标文件 |
 | `ORGANIZATION_DOMAIN` | `"https://www.cetxiyuan.com/"` | 公司域名 |
@@ -38,7 +38,7 @@
 
 | 宏 | 说明 |
 |----|------|
-| `FILE_VERSION` | Windows 文件版本（`2,5,0`） |
+| `FILE_VERSION` | Windows 文件版本（`2,6,0`） |
 | `FILE_VERSION_STR` | 文件版本字符串 |
 | `FILE_DESCRIPTION` | 文件描述（"CetDevelopmentKit based on Qt 5.15.2 (MinGW, 32 bit)"） |
 | `LEGAL_COPYRIGHT` | 版权信息 |
@@ -46,13 +46,13 @@
 
 ### 版本编码说明
 
-以 `RELEASE_DATE` 宏 `(CXYQK5152.CDPK250.G716)` 为例：
+以 `RELEASE_DATE` 宏 `(CXYQK5152.CDPK260.G832)` 为例：
 
 | 段 | 含义 |
 |---|---|
 | `CXYQK5152` | CetXiyuan Qt Kernel 5.15.2（Qt 版本） |
-| `CDPK250` | CetDevelopmentKit 第 250 次构建 |
-| `G716` | G=2026年（A=2020年起），7=7月，16编码为 16−7=9 即 9日 |
+| `CDPK260` | CetDevelopmentKit 第 260 次构建 |
+| `G832` | G=2026年（A=2020年起字母顺延），8=8月，32−8=24 即 24 日 |
 
 ---
 
@@ -99,20 +99,13 @@ MainWindow(QWidget *parent = nullptr);
 
 清理 `m_cmdProcess` 和 UI 资源。
 
-#### 私有方法
-
-```cpp
-void doCurrentIndexChanged(int index);
-```
-
-**槽函数**，响应 `QComboBox::currentIndexChanged`。根据选中的功能模块切换显示对应的配置面板，并保存选择到 `QSettings`。
-
 #### 私有槽
 
 | 槽 | 签名 | 说明 |
 |----|------|------|
+| `doCurrentIndexChanged` | `(int index)` | 响应 `QComboBox::currentIndexChanged`：切换显示对应的配置面板，并保存选择到 `QSettings` |
 | `onProcessFinished` | `(int exitCode, QProcess::ExitStatus exitStatus)` | 进程结束处理：正常退出置进度条 100%，异常退出记录日志 |
-| `on_processHandleButton_clicked` | `()` | 执行按钮：关闭当前进程 → 获取命令 → 启动新进程 |
+| `on_processHandleButton_clicked` | `()` | 处理按钮：关闭当前进程 → 获取命令 → 启动新进程 |
 | `on_processConfigureButton_clicked` | `()` | 配置按钮：折叠/展开配置面板 |
 
 #### 关键 Lambda 连接
@@ -157,7 +150,7 @@ connect(m_cmdProcess, &QProcess::readyReadStandardError, this, [=]() {
 
 ### 2.2 CetToolPluginContext
 
-**头文件**: `mainwindow/cettoolplugincontext.h`（声明），实现位于 `CetToolDLLs/CetToolDLLs/`
+**头文件**: `mainwindow/cettoolplugincontext.h`（声明），实现位于 `CetToolDLLs/CetToolLibs/CetProductWizard/cettoolplugincontext.cpp`
 
 **用途**: 插件上下文管理器，统一封装所有插件的加载、完整性校验、激活时序调度和更新检测。
 
@@ -173,7 +166,7 @@ explicit CetToolPluginContext(const QString &selfHash, QWidget *parent = nullptr
 - `selfHash` — `CetProductWizard.dll` 的 SHA256 期望哈希值（编译时嵌入，通过 `cettooldlls_hashes.h` 传入 `HASH_CetProductWizard_DLL`）
 - `parent` — 父控件
 
-构造时调用 `selfIntegrityCheck()` 对 `CetProductWizard.dll` 做 SHA256 校验。
+构造时调用 `selfIntegrityCheck()` 对 `CetProductWizard.dll` 做 SHA256 校验（失败会 `qFatal()` 终止程序）；随后 `loadPlugin()` 还会通过 `checkPluginIntegrity()` 对 `CetLicensePlugin.dll` / `CetUpdatePlugin.dll` / `CetProgressPlugin.dll` 做 SHA256 校验，失败则拒绝加载。
 
 #### 公共方法
 
@@ -189,17 +182,17 @@ void initFeatures(QMenu *logManagerMenu,
 
 初始化所有功能插件，包括：
 - 配置日志管理菜单项
-- 加载许可证插件并设置激活时序（10 秒首次 + 指数退避）
+- 加载许可证插件并设置激活时序（30 秒首次激活 + 从 10 分钟起的指数退避）
 - 加载更新检测插件并检查更新
 - 加载进度显示插件
 
 **参数**:
 - `logManagerMenu` — 日志管理菜单项
 - `licenseMenu` — 许可证菜单项
-- `productName` — 产品名称（用作激活 ID，如 `"CetDevelopmentKit250"`）
+- `productName` — 产品名称（用作激活 ID，如 `"CetDevelopmentKit260"`）
 - `versionTitle` — 版本标题（显示在标题栏）
 - `appName` — 应用名称（如 `"CetDevelopmentKit"`）
-- `appVersion` — 应用版本号（如 `"2.5.0"`）
+- `appVersion` — 应用版本号（如 `"2.6.0.8281"`）
 - `onActivated` — 激活状态回调
 
 ```cpp
@@ -442,7 +435,7 @@ typedef void (*callback_t)(void);
 
 **参数**:
 - `appName` — 应用名称（如 `"CetDevelopmentKit"`）
-- `appVersion` — 当前版本号（如 `"2.5.0"`）
+- `appVersion` — 当前版本号（如 `"2.6.0.8281"`）
 - `callback` — 可选回调函数，更新完成后调用（如 `QCoreApplication::quit`）
 - `newVersion` — 输出参数，新版本号
 
@@ -520,6 +513,8 @@ outputDir=<string>     ; 本地输出目录
 | `ui->processComboBox` | `currentIndexChanged(int)` | `MainWindow` | `doCurrentIndexChanged` |
 | `ui->processHandleButton` | `clicked()` | `MainWindow` | `on_processHandleButton_clicked` |
 | `ui->processConfigureButton` | `clicked()` | `MainWindow` | `on_processConfigureButton_clicked` |
+
+> 说明：`ui->processHandleButton` / `ui->processConfigureButton` 两行并非代码中显式 `connect()`，而是 `ui->setupUi(this)` 按 `on_<对象名>_<信号>` 命名约定自动连接。
 
 ---
 

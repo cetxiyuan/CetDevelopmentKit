@@ -6,12 +6,14 @@
 <title>CetDevelopmentKit API 参考</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/shell.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
 <style>
@@ -294,7 +296,7 @@ body {
     <div id="doc-content">
 <h1>CetDevelopmentKit API 参考</h1>
 <h2>一、版本信息</h2>
-<p><strong>当前版本</strong>: V2.5.0</p>
+<p><strong>当前版本</strong>: V2.6.0.8281</p>
 <h3>版本号</h3>
 <table>
 <thead>
@@ -312,7 +314,7 @@ body {
 </tr>
 <tr>
 <td><code>VER_MINOR</code></td>
-<td>5</td>
+<td>6</td>
 <td>次版本号</td>
 </tr>
 <tr>
@@ -327,17 +329,17 @@ body {
 </tr>
 <tr>
 <td><code>APP_VERSION</code></td>
-<td><code>"2.5.0.7152"</code></td>
+<td><code>"2.6.0.8281"</code></td>
 <td>应用版本字符串（补丁版）</td>
 </tr>
 <tr>
 <td><code>TIP_VERSION</code></td>
-<td><code>"(CXYQK5152.CDPK250.G716) Patch-7152"</code></td>
+<td><code>"(CXYQK5152.CDPK260.G832) Patch-8281"</code></td>
 <td>版本提示字符串（补丁版）</td>
 </tr>
 <tr>
 <td><code>PATCH_PACKET</code></td>
-<td><code>"7152"</code></td>
+<td><code>"8281"</code></td>
 <td>补丁包号</td>
 </tr>
 </tbody>
@@ -359,7 +361,7 @@ body {
 </tr>
 <tr>
 <td><code>PRODUCT_NAME</code></td>
-<td><code>"CetDevelopmentKit250"</code></td>
+<td><code>"CetDevelopmentKit260"</code></td>
 <td>产品 ID（= APP_NAME + 主版本号 + 次版本号 + "0"）</td>
 </tr>
 <tr>
@@ -413,7 +415,7 @@ body {
 <tbody>
 <tr>
 <td><code>FILE_VERSION</code></td>
-<td>Windows 文件版本（<code>2,5,0</code>）</td>
+<td>Windows 文件版本（<code>2,6,0</code>）</td>
 </tr>
 <tr>
 <td><code>FILE_VERSION_STR</code></td>
@@ -434,7 +436,7 @@ body {
 </tbody>
 </table>
 <h3>版本编码说明</h3>
-<p>以 <code>RELEASE_DATE</code> 宏 <code>(CXYQK5152.CDPK250.G716)</code> 为例：</p>
+<p>以 <code>RELEASE_DATE</code> 宏 <code>(CXYQK5152.CDPK260.G832)</code> 为例：</p>
 <table>
 <thead>
 <tr>
@@ -448,12 +450,12 @@ body {
 <td>CetXiyuan Qt Kernel 5.15.2（Qt 版本）</td>
 </tr>
 <tr>
-<td><code>CDPK250</code></td>
-<td>CetDevelopmentKit 第 250 次构建</td>
+<td><code>CDPK260</code></td>
+<td>CetDevelopmentKit 第 260 次构建</td>
 </tr>
 <tr>
-<td><code>G716</code></td>
-<td>G=2026年（A=2020年起），7=7月，16编码为 16−7=9 即 9日</td>
+<td><code>G832</code></td>
+<td>G=2026年（A=2020年起字母顺延），8=8月，32−8=24 即 24 日</td>
 </tr>
 </tbody>
 </table>
@@ -488,11 +490,6 @@ body {
 </code></pre></div></div>
 
 <p>清理 <code>m_cmdProcess</code> 和 UI 资源。</p>
-<h4>私有方法</h4>
-<div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">doCurrentIndexChanged</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p><strong>槽函数</strong>，响应 <code>QComboBox::currentIndexChanged</code>。根据选中的功能模块切换显示对应的配置面板，并保存选择到 <code>QSettings</code>。</p>
 <h4>私有槽</h4>
 <table>
 <thead>
@@ -504,6 +501,11 @@ body {
 </thead>
 <tbody>
 <tr>
+<td><code>doCurrentIndexChanged</code></td>
+<td><code>(int index)</code></td>
+<td>响应 <code>QComboBox::currentIndexChanged</code>：切换显示对应的配置面板，并保存选择到 <code>QSettings</code></td>
+</tr>
+<tr>
 <td><code>onProcessFinished</code></td>
 <td><code>(int exitCode, QProcess::ExitStatus exitStatus)</code></td>
 <td>进程结束处理：正常退出置进度条 100%，异常退出记录日志</td>
@@ -511,7 +513,7 @@ body {
 <tr>
 <td><code>on_processHandleButton_clicked</code></td>
 <td><code>()</code></td>
-<td>执行按钮：关闭当前进程 → 获取命令 → 启动新进程</td>
+<td>处理按钮：关闭当前进程 → 获取命令 → 启动新进程</td>
 </tr>
 <tr>
 <td><code>on_processConfigureButton_clicked</code></td>
@@ -587,7 +589,7 @@ body {
 </blockquote>
 <hr />
 <h3>2.2 CetToolPluginContext</h3>
-<p><strong>头文件</strong>: <code>mainwindow/cettoolplugincontext.h</code>（声明），实现位于 <code>CetToolDLLs/CetToolDLLs/</code></p>
+<p><strong>头文件</strong>: <code>mainwindow/cettoolplugincontext.h</code>（声明），实现位于 <code>CetToolDLLs/CetToolLibs/CetProductWizard/cettoolplugincontext.cpp</code></p>
 <p><strong>用途</strong>: 插件上下文管理器，统一封装所有插件的加载、完整性校验、激活时序调度和更新检测。</p>
 <p><strong>继承关系</strong>: <code>QWidget</code></p>
 <h4>构造函数</h4>
@@ -597,7 +599,7 @@ body {
 <p><strong>参数</strong>:
 - <code>selfHash</code> — <code>CetProductWizard.dll</code> 的 SHA256 期望哈希值（编译时嵌入，通过 <code>cettooldlls_hashes.h</code> 传入 <code>HASH_CetProductWizard_DLL</code>）
 - <code>parent</code> — 父控件</p>
-<p>构造时调用 <code>selfIntegrityCheck()</code> 对 <code>CetProductWizard.dll</code> 做 SHA256 校验。</p>
+<p>构造时调用 <code>selfIntegrityCheck()</code> 对 <code>CetProductWizard.dll</code> 做 SHA256 校验（失败会 <code>qFatal()</code> 终止程序）；随后 <code>loadPlugin()</code> 还会通过 <code>checkPluginIntegrity()</code> 对 <code>CetLicensePlugin.dll</code> / <code>CetUpdatePlugin.dll</code> / <code>CetProgressPlugin.dll</code> 做 SHA256 校验，失败则拒绝加载。</p>
 <h4>公共方法</h4>
 <div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">initFeatures</span><span class="p">(</span><span class="n">QMenu</span><span class="w"> </span><span class="o">*</span><span class="n">logManagerMenu</span><span class="p">,</span>
 <span class="w">                  </span><span class="n">QMenu</span><span class="w"> </span><span class="o">*</span><span class="n">licenseMenu</span><span class="p">,</span>
@@ -610,16 +612,16 @@ body {
 
 <p>初始化所有功能插件，包括：
 - 配置日志管理菜单项
-- 加载许可证插件并设置激活时序（10 秒首次 + 指数退避）
+- 加载许可证插件并设置激活时序（30 秒首次激活 + 从 10 分钟起的指数退避）
 - 加载更新检测插件并检查更新
 - 加载进度显示插件</p>
 <p><strong>参数</strong>:
 - <code>logManagerMenu</code> — 日志管理菜单项
 - <code>licenseMenu</code> — 许可证菜单项
-- <code>productName</code> — 产品名称（用作激活 ID，如 <code>"CetDevelopmentKit250"</code>）
+- <code>productName</code> — 产品名称（用作激活 ID，如 <code>"CetDevelopmentKit260"</code>）
 - <code>versionTitle</code> — 版本标题（显示在标题栏）
 - <code>appName</code> — 应用名称（如 <code>"CetDevelopmentKit"</code>）
-- <code>appVersion</code> — 应用版本号（如 <code>"2.5.0"</code>）
+- <code>appVersion</code> — 应用版本号（如 <code>"2.6.0.8281"</code>）
 - <code>onActivated</code> — 激活状态回调</p>
 <div class="code-block-wrapper"><button class="code-copy-btn" onclick="copyCode(this)" title="复制代码">📋 复制</button><div class="codehilite"><pre><span></span><code><span class="n">QObject</span><span class="w"> </span><span class="o">*</span><span class="nf">loadPlugin</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dllName</span><span class="p">,</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">*</span><span class="n">errInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">);</span>
 </code></pre></div></div>
@@ -1017,7 +1019,7 @@ body {
 </table>
 <p><strong>参数</strong>:
 - <code>appName</code> — 应用名称（如 <code>"CetDevelopmentKit"</code>）
-- <code>appVersion</code> — 当前版本号（如 <code>"2.5.0"</code>）
+- <code>appVersion</code> — 当前版本号（如 <code>"2.6.0.8281"</code>）
 - <code>callback</code> — 可选回调函数，更新完成后调用（如 <code>QCoreApplication::quit</code>）
 - <code>newVersion</code> — 输出参数，新版本号</p>
 <hr />
@@ -1134,6 +1136,9 @@ body {
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>说明：<code>ui-&gt;processHandleButton</code> / <code>ui-&gt;processConfigureButton</code> 两行并非代码中显式 <code>connect()</code>，而是 <code>ui-&gt;setupUi(this)</code> 按 <code>on_&lt;对象名&gt;_&lt;信号&gt;</code> 命名约定自动连接。</p>
+</blockquote>
 <hr />
 <h2>六、CetToolPluginContext 宏定义</h2>
 <h3>mainwindow.cpp 中的版本宏</h3>
@@ -1164,7 +1169,7 @@ body {
 
 <p>与 <code>productwizard.h</code> 保持一致，避免重复定义。</p>
     </div>
-    <div id="doc-footer">📄 文档转换 · 筆名 CetXiyuan</div>
+    <div id="doc-footer">📄 文档转换 · 笔名 CetXiyuan</div>
 </div>
 <div id="toast"></div>
 
