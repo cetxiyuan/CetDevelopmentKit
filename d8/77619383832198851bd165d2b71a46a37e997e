@@ -1,0 +1,19 @@
+CetDevelopmentKit/mainwindow/cettoolplugincontext.h
+  s_2bb3511cdc8f90::t_f313a776e02492 56-58,60-62,65-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d877619383832198851bd165d2b71a46a37e997e",
+  "prompts": {},
+  "sessions": {
+    "s_2bb3511cdc8f90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b3469073-692a-45e5-8abb-891604552eb1",
+        "model": "DeepSeek-V4.1-Flash-P029"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    }
+  }
+}
