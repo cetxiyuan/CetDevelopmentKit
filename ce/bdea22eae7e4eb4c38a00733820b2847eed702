@@ -1,0 +1,21 @@
+CetDevelopmentKit-Release/LICENSE/license
+  s_2bb3511cdc8f90::t_b8c53e2012f01b 2-4,6
+CetDevelopmentKit-Setup/CetDevelopmentKit.iss
+  s_2bb3511cdc8f90::t_277c279dd1a42a 5,11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cebdea22eae7e4eb4c38a00733820b2847eed702",
+  "prompts": {},
+  "sessions": {
+    "s_2bb3511cdc8f90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b3469073-692a-45e5-8abb-891604552eb1",
+        "model": "deepseek-v4-1-flash-260910"
+      },
+      "human_author": "cetxiyuan <zhengjianyu@yaxon.com>"
+    }
+  }
+}
