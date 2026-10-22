@@ -53,8 +53,23 @@ public:
     // 带完整性校验的插件加载
     QObject *loadPlugin(const QString &dllName, QString *errInfo = nullptr);
 
+private slots:
+    void onAuthorizationChanged(bool authorized, const QString &message);
+
 private:
+    // 激活状态三态：Unknown 表示尚未应用过任何状态，首次调用必定触发应用
+    enum class ActivationState { Unknown, Disabled, Enabled };
+
     static bool selfIntegrityCheck(const QString &expectedHash);
+
+    void applyActivatedState(bool activated, const QString &reason, bool showPopup);
+
+    QMainWindow *m_mainWin = nullptr;
+    QMenu *m_licenseMenu = nullptr;
+    QString m_productName;
+    QString m_versionTitle;
+    std::function<void(bool)> m_onActivated;
+    ActivationState m_lastActivation = ActivationState::Unknown;
 
     bool m_integrityOk;
     CetLogManagerInterface *m_cetLogManagerInterface = nullptr;
